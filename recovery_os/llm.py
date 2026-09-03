@@ -113,6 +113,7 @@ def _anthropic_call_fn(model: str):
 
 def _groq_call_fn(model: str, api_key: str):
     """Groq via its OpenAI-compatible endpoint (stdlib only). temperature=0."""
+    import time
     import urllib.error
     import urllib.request
 
@@ -131,12 +132,18 @@ def _groq_call_fn(model: str, api_key: str):
             headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json",
                      # Groq's edge blocks the default Python-urllib UA (Cloudflare 1010).
                      "User-Agent": "recovery-os/0.1"})
-        try:
-            with urllib.request.urlopen(req, timeout=30) as r:
-                data = json.loads(r.read())
-        except urllib.error.HTTPError as e:
-            # surface Groq's JSON error body (e.g. decommissioned model) not "HTTP 400"
-            raise _Fault("api_error", f"groq {e.code}: {e.read().decode()[:180]}")
+        for attempt in range(4):  # retry the free-tier rate limit before giving up
+            try:
+                with urllib.request.urlopen(req, timeout=30) as r:
+                    data = json.loads(r.read())
+                break
+            except urllib.error.HTTPError as e:
+                if e.code == 429 and attempt < 3:
+                    wait = float(e.headers.get("retry-after") or 2)
+                    time.sleep(min(wait, 10))
+                    continue
+                # surface Groq's JSON error body (e.g. decommissioned model)
+                raise _Fault("api_error", f"groq {e.code}: {e.read().decode()[:180]}")
         args = data["choices"][0]["message"]["tool_calls"][0]["function"]["arguments"]
         return json.loads(args)
 
