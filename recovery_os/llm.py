@@ -113,6 +113,7 @@ def _anthropic_call_fn(model: str):
 
 def _groq_call_fn(model: str, api_key: str):
     """Groq via its OpenAI-compatible endpoint (stdlib only). temperature=0."""
+    import urllib.error
     import urllib.request
 
     def call(signals: dict[str, object]) -> dict:
@@ -127,9 +128,15 @@ def _groq_call_fn(model: str, api_key: str):
         }).encode()
         req = urllib.request.Request(
             "https://api.groq.com/openai/v1/chat/completions", data=body,
-            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"})
-        with urllib.request.urlopen(req, timeout=30) as r:
-            data = json.loads(r.read())
+            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json",
+                     # Groq's edge blocks the default Python-urllib UA (Cloudflare 1010).
+                     "User-Agent": "recovery-os/0.1"})
+        try:
+            with urllib.request.urlopen(req, timeout=30) as r:
+                data = json.loads(r.read())
+        except urllib.error.HTTPError as e:
+            # surface Groq's JSON error body (e.g. decommissioned model) not "HTTP 400"
+            raise _Fault("api_error", f"groq {e.code}: {e.read().decode()[:180]}")
         args = data["choices"][0]["message"]["tool_calls"][0]["function"]["arguments"]
         return json.loads(args)
 
@@ -142,7 +149,9 @@ def _default_backend(model: str | None) -> tuple[object | None, str]:
     override = os.getenv("RECOVERY_OS_LLM_MODEL")
     gk = os.getenv("GROQ_API_KEY")
     if gk:
-        m = model or override or "llama-3.3-70b-versatile"
+        # Groq rotates its catalog; override with RECOVERY_OS_LLM_MODEL if this id
+        # 404s (list via GET /openai/v1/models). gpt-oss-120b has strong tool use.
+        m = model or override or "openai/gpt-oss-120b"
         return _groq_call_fn(m, gk), m
     if os.getenv("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_AUTH_TOKEN"):
         m = model or override or "claude-opus-5"

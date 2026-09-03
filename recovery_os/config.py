@@ -45,7 +45,10 @@ ASSUMPTIONS_NOTE = (
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix="RECOVERY_OS_", env_file=".env")
+    # extra="ignore": the .env also holds non-RECOVERY_OS keys (GROQ_API_KEY,
+    # ANTHROPIC_API_KEY); Settings must not choke on them.
+    model_config = SettingsConfigDict(
+        env_prefix="RECOVERY_OS_", env_file=".env", extra="ignore")
 
     seed: int = 42
     db_path: str = "recovery_os.db"
@@ -73,7 +76,13 @@ def load_env_file(path: str = ".env") -> None:
         if not line or line.startswith("#") or "=" not in line:
             continue
         key, _, val = line.partition("=")
-        os.environ.setdefault(key.strip(), val.strip().strip('"').strip("'"))
+        val = val.strip()
+        if val[:1] in ("'", '"'):  # quoted value: keep everything inside the quotes
+            end = val.find(val[0], 1)
+            val = val[1:end] if end != -1 else val[1:]
+        else:  # unquoted: drop an inline comment ( space + # ), then trim
+            val = val.split(" #", 1)[0].split("\t#", 1)[0].strip()
+        os.environ.setdefault(key.strip(), val)
 
 
 @lru_cache
