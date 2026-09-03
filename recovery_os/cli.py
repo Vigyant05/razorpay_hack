@@ -5,10 +5,11 @@ from __future__ import annotations
 import argparse
 
 from . import __version__
-from .config import get_settings
+from .config import get_settings, load_env_file
 
 
 def main(argv: list[str] | None = None) -> int:
+    load_env_file()  # pick up GROQ_API_KEY / ANTHROPIC_API_KEY etc. from a local .env
     parser = argparse.ArgumentParser(prog="recovery-os", description="Recovery OS")
     parser.add_argument("--version", action="version", version=f"recovery-os {__version__}")
     sub = parser.add_subparsers(dest="command")

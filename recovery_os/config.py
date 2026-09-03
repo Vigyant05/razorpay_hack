@@ -55,6 +55,27 @@ class Settings(BaseSettings):
     provider: str = "simulated"  # "simulated" | "razorpay_test"
 
 
+def load_env_file(path: str = ".env") -> None:
+    """Best-effort load of KEY=VALUE lines from a .env into os.environ (no override).
+
+    pydantic-settings already reads .env for RECOVERY_OS_* fields; this also exposes
+    plain keys like GROQ_API_KEY / ANTHROPIC_API_KEY to os.getenv. Called from the
+    CLI entrypoint only — library code stays env-pure so tests are hermetic.
+    """
+    import os
+    from pathlib import Path
+
+    p = Path(path)
+    if not p.exists():
+        return
+    for line in p.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, val = line.partition("=")
+        os.environ.setdefault(key.strip(), val.strip().strip('"').strip("'"))
+
+
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
