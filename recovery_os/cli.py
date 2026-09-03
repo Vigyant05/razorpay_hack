@@ -1,4 +1,4 @@
-"""Thin CLI entry stub. No run logic yet (invariant: stubs only)."""
+"""Thin CLI entry."""
 
 from __future__ import annotations
 
@@ -15,7 +15,40 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("info", help="print active config")
     p_run = sub.add_parser("run", help="run the recovery loop for one payment")
     p_run.add_argument("payment_id", help="e.g. pay_ABC123")
+
+    p_batch = sub.add_parser("batch", help="run a seeded batch + scorecard")
+    p_batch.add_argument("--n", type=int, default=100, help="number of episodes")
+    p_batch.add_argument("--seed", type=int, default=42)
+    p_batch.add_argument("--control-frac", type=float, default=0.2, dest="control_frac")
+    p_batch.add_argument("--policy", default="agent",
+                         choices=["agent", "immediate", "fixed_schedule", "never"])
+    p_batch.add_argument("--compare", action="store_true",
+                         help="run all four policies side by side")
+    p_batch.add_argument("--out", help="write the full scorecard(s) to JSON")
+    p_batch.add_argument("--db", default="batch.db", help="ledger db for the batch")
+
     args = parser.parse_args(argv)
+
+    if args.command == "batch":
+        from .batch import run_batch, run_compare
+        from .scorecard import to_comparison_table, to_table
+
+        if args.compare:
+            cmp = run_compare(args.n, args.seed, args.control_frac, db_path=args.db)
+            print(to_comparison_table(cmp))
+            for card in cmp.scorecards:
+                print("\n" + to_table(card))
+            payload = cmp
+        else:
+            card = run_batch(args.n, args.seed, args.control_frac, args.policy, db_path=args.db)
+            print(to_table(card))
+            payload = card
+
+        if args.out:
+            with open(args.out, "w") as f:
+                f.write(payload.model_dump_json(indent=2))
+            print(f"\nwrote {args.out}")
+        return 0
 
     if args.command == "run":
         from .orchestrator import run_episode

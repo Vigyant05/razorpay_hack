@@ -123,6 +123,7 @@ class ExecutionResult(BaseModel):
     status: ExecStatus
     provider: str
     detail: str = ""
+    wasted_actions: int = 0  # intervention attempts fired that did not recover
     executed_at: datetime = Field(default_factory=_now)
 
 
@@ -144,14 +145,16 @@ class Attribution(BaseModel):
 
 
 class RunReport(BaseModel):
-    """Flat summary of one episode's run. Scorecard rows aggregate these later."""
+    """Flat summary of one episode's run. Scorecard rows aggregate these."""
     episode_id: str
     cause: FailureCause
     intervention: Intervention
+    amount: int  # paise, the ₹ at stake for this episode
     policy_status: PolicyStatus
     rule_fired: str | None
     executed: ExecStatus | None  # None if the gate blocked before execution
     recovered: bool
+    wasted_actions: int = 0
 
 
 # Canonical provider error codes per cause — shared vocabulary so the simulator

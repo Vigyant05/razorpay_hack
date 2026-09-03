@@ -14,7 +14,7 @@ import hashlib
 import random
 from typing import Protocol
 
-from .config import get_settings
+from .config import SELF_RECOVERY, get_settings
 from .domain import (
     ERROR_CODES,
     Episode,
@@ -75,14 +75,18 @@ class SimulatedProvider(_GatedProvider):
 
     name = "simulated"
 
-    def __init__(self) -> None:
-        self._seed = get_settings().seed
+    def __init__(self, seed: int | None = None) -> None:
+        self._seed = seed if seed is not None else get_settings().seed
         self._cause: dict[str, FailureCause] = {}
         self._recovered: dict[str, bool] = {}
 
     def _seeded(self, salt: str) -> random.Random:
         h = hashlib.sha256(f"{self._seed}:{salt}".encode()).digest()
         return random.Random(int.from_bytes(h[:8], "big"))
+
+    def _self_recovers(self, episode_id: str, cause: FailureCause) -> bool:
+        """Latent, seeded draw: would this failure have recovered with no action?"""
+        return self._seeded(f"self:{episode_id}").random() < SELF_RECOVERY[cause]
 
     def fetch_payment(self, payment_id: str) -> Episode:
         r = self._seeded(f"fetch:{payment_id}")
@@ -104,22 +108,38 @@ class SimulatedProvider(_GatedProvider):
         eid = mandate.action.episode_id
         cause = self._cause[eid]  # KeyError if execute precedes fetch — intended
         iv = mandate.action.intervention
+        self_recovered = self._self_recovers(eid, cause)
 
         if iv is Intervention.do_nothing:
-            status, recovered, detail = ExecStatus.success, False, "no-op"
+            # No action fired; outcome is pure self-recovery (this is the control arm).
+            recovered, wasted = self_recovered, 0
+            status = ExecStatus.success
+            detail = f"no-op; self-recovery={'yes' if self_recovered else 'no'}"
         elif iv is Intervention.human_escalation:
-            status, recovered, detail = ExecStatus.pending, False, "handed to human queue"
+            recovered, wasted = False, 0
+            status = ExecStatus.pending
+            detail = "handed to human queue"
         else:
+            # Fire up to `attempts` seeded retry draws; stop on the first hit.
+            attempts = max(1, int(mandate.action.params.get("attempts", "1")))
             rate = _MATCH_RATE if _BEST_FIX[cause] is iv else _MISMATCH_RATE
-            hit = self._seeded(f"exec:{eid}:{iv.value}").random() < rate
-            status = ExecStatus.success if hit else ExecStatus.failed
-            recovered = hit
-            detail = f"{iv.value} vs {cause.value}: {'recovered' if hit else 'still failed'}"
+            r = self._seeded(f"exec:{eid}:{iv.value}")
+            hit, fired = False, 0
+            for _ in range(attempts):
+                fired += 1
+                if r.random() < rate:
+                    hit = True
+                    break
+            wasted = fired - (1 if hit else 0)  # non-hit attempts are wasted effort
+            recovered = self_recovered or hit
+            status = ExecStatus.success if recovered else ExecStatus.failed
+            via = "intervention" if hit else ("self-recovery" if self_recovered else "none")
+            detail = f"{iv.value} vs {cause.value}: {fired} attempt(s), recovered via {via}"
 
         self._recovered[eid] = recovered
         return ExecutionResult(
             episode_id=eid, signature=mandate.signature, status=status,
-            provider=self.name, detail=detail,
+            provider=self.name, detail=detail, wasted_actions=wasted,
         )
 
     def verify(self, episode_id: str) -> VerificationResult:

@@ -13,6 +13,8 @@ deterministic policy engine keeps disposing regardless.
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 from . import ledger, signing
 from .domain import (
     ERROR_CODES,
@@ -29,6 +31,9 @@ from .domain import (
 )
 from .policy import PolicyEngine
 from .providers import PaymentProvider, get_provider
+
+# The strategy seam: a policy maps (diagnosis, episode) -> action.
+Proposer = Callable[[Diagnosis, Episode], ProposedAction]
 
 _CAUSE_BY_CODE = {code: cause for cause, code in ERROR_CODES.items()}
 
@@ -82,11 +87,17 @@ def run_episode(
     payment_id: str,
     provider: PaymentProvider | None = None,
     engine: PolicyEngine | None = None,
+    proposer: Proposer | None = None,
     db_path: str | None = None,
 ) -> RunReport:
-    """Run the full recovery loop for one failed payment. Reproducible per seed."""
+    """Run the full recovery loop for one failed payment. Reproducible per seed.
+
+    `proposer` is the strategy seam (invariant #1): swap in a baseline policy or,
+    later, the LLM proposer. Defaults to the cause-aware heuristic `propose`.
+    """
     provider = provider or get_provider()  # one instance: holds the episode's state
     engine = engine or PolicyEngine()
+    proposer = proposer or propose
 
     episode = provider.fetch_payment(payment_id)
     ledger.append(episode.episode_id, LedgerStep.episode, episode, db_path=db_path)
@@ -94,7 +105,7 @@ def run_episode(
     diagnosis = diagnose(episode)
     ledger.append(episode.episode_id, LedgerStep.diagnosis, diagnosis, db_path=db_path)
 
-    action = propose(diagnosis, episode)
+    action = proposer(diagnosis, episode)
     ledger.append(episode.episode_id, LedgerStep.proposal, action, db_path=db_path)
 
     decision = engine.decide(action, episode)
@@ -105,8 +116,9 @@ def run_episode(
         # re-proposal / auto-escalation on block is a later phase.
         return RunReport(
             episode_id=episode.episode_id, cause=diagnosis.cause,
-            intervention=action.intervention, policy_status=decision.status,
-            rule_fired=decision.rule_fired, executed=None, recovered=False,
+            intervention=action.intervention, amount=episode.amount,
+            policy_status=decision.status, rule_fired=decision.rule_fired,
+            executed=None, recovered=False,
         )
 
     mandate = signing.issue_mandate(decision)
@@ -124,6 +136,8 @@ def run_episode(
 
     return RunReport(
         episode_id=episode.episode_id, cause=diagnosis.cause,
-        intervention=decision.effective_action.intervention, policy_status=decision.status,
-        rule_fired=decision.rule_fired, executed=result.status, recovered=verification.recovered,
+        intervention=decision.effective_action.intervention, amount=episode.amount,
+        policy_status=decision.status, rule_fired=decision.rule_fired,
+        executed=result.status, recovered=verification.recovered,
+        wasted_actions=result.wasted_actions,
     )
