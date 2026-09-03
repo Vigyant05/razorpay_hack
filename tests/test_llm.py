@@ -22,7 +22,7 @@ FIX = build_fixtures.FIXTURE_DIR
 
 
 def _proposer(cache_dir, db):
-    return LLMProposer(client=None, cache_dir=str(cache_dir), db_path=db)
+    return LLMProposer(call_fn=None, cache_dir=str(cache_dir), db_path=db)  # offline
 
 
 def test_parses_cached_response(tmp_path):
@@ -96,6 +96,11 @@ def _warm_batch_cache(cache_dir, n, seed, control_frac):
 def test_llm_batch_reproducible_from_cache(tmp_path, monkeypatch):
     from recovery_os.batch import run_batch
 
+    # force offline + the fixture model so warmed keys match, even if the dev
+    # machine has a real key exported.
+    for var in ("GROQ_API_KEY", "ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN",
+                "RECOVERY_OS_LLM_MODEL"):
+        monkeypatch.delenv(var, raising=False)
     cache = tmp_path / "cache"
     _warm_batch_cache(cache, n=20, seed=7, control_frac=0.2)
     monkeypatch.setenv("RECOVERY_OS_LLM_CACHE_DIR", str(cache))

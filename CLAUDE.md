@@ -17,8 +17,27 @@ Bounded, self-auditing agent for AI payment recovery. Razorpay buildathon, Track
    update/delete. One row per run-step.
 4. **Signed mandates.** ed25519. Signature + public key stored on the mandate and in
    the ledger. `signing.verify` proves tamper-evidence.
-5. **Reproducibility.** All randomness from `config.rng()` (seeded). Any future LLM
-   calls at temperature 0. Same seed -> identical results.
+5. **Reproducibility.** All randomness from `config.rng()` (seeded); the simulator
+   seeds per-episode. LLM calls go through a disk record-replay cache keyed by a
+   hash of the episode signals, so same seed + warm cache -> identical results and
+   zero API calls in CI.
+
+## The proposer seam (Phase 3)
+`orchestrator.run_episode` injects `diagnoser` + `proposer` (both default to the
+heuristics). The LLM plugs in here and ONLY here — it outputs a typed `Diagnosis`
++ `ProposedAction` and never executes, signs, or bypasses the gate. Its output is
+untrusted input to the same `PolicyDecision -> issue_mandate -> execute` path. Any
+LLM fault (API error, cache miss, off-enum, malformed) logs a `LedgerStep.fault`
+row and falls back to the heuristic — never crashes a batch, never skips the gate.
+Backends are swappable via a `call_fn` (Anthropic default, Groq optional); adding
+one must not add a path from a raw proposal to `execute`.
+
+## Measurement (Phase 2)
+`batch.py` runs the unchanged loop over a seeded, stratified treatment/control
+holdout; `scorecard.py` reports INCREMENTAL lift over the self-recovery baseline
+(not raw), with 95% CIs, false-effort, and gate-blocked exceptions excluded from
+the lift denominator. Self-recovery rates + amount range are labeled tunable
+assumptions in `config.py`. Do not headline raw recovery.
 
 ## Conventions
 - **Money is `int` minor units (paise). Never a float.**
@@ -27,8 +46,10 @@ Bounded, self-auditing agent for AI payment recovery. Razorpay buildathon, Track
 - Ask before adding scope/deps.
 
 ## Module map
-`config` settings+RNG · `domain` enums+models · `signing` gate+ed25519 ·
-`policy` rules · `providers` adapter · `ledger` audit store · `cli`/`api` entry stubs.
+`config` settings+RNG+assumptions · `domain` enums+models · `signing` gate+ed25519 ·
+`policy` rules · `providers` adapter+simulator · `ledger` audit store ·
+`orchestrator` run loop + heuristic seams · `batch` runner+holdout ·
+`scorecard` incremental math+tables · `llm` cached LLM proposer · `cli`/`api` entries.
 
 ## Domain vocabulary
 Failure causes: issuer_downtime, insufficient_funds, expired_instrument,
@@ -36,6 +57,6 @@ network_error, abandonment, mandate_failure.
 Interventions: smart_retry, method_switch, mandate_reauth, customer_nudge,
 human_escalation, do_nothing.
 
-## Deliberately NOT built yet (stubs only)
-LLM diagnosis/decision, simulator failure generation, batch runner, scorecard/
-incrementality math, RAG, nudges, dispute-defense, real Razorpay calls.
+## Deliberately NOT built yet
+RAG Q&A over the ledger, vernacular nudges, dispute-defense, real Razorpay API
+calls (`RazorpayTestProvider` is still a stub).

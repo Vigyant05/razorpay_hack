@@ -88,15 +88,69 @@ def _user_prompt(signals: dict[str, object]) -> str:
     )
 
 
-def _default_client():
-    # Offline-safe: no key -> no client -> straight to cache/fallback, no network.
-    if not (os.getenv("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_AUTH_TOKEN")):
-        return None
-    try:
-        import anthropic
-        return anthropic.Anthropic()
-    except Exception:
-        return None
+# A call_fn maps the episode signals to the raw structured dict {cause, confidence,
+# diagnosis_rationale, intervention, proposal_rationale}. The rest of LLMProposer
+# (cache, validation, fallback, fault-logging) is backend-agnostic.
+
+def _anthropic_call_fn(model: str):
+    import anthropic
+    client = anthropic.Anthropic()
+
+    def call(signals: dict[str, object]) -> dict:
+        resp = client.messages.create(
+            model=model, max_tokens=1024, output_config={"effort": "low"},
+            system=SYSTEM, tools=[TOOL],
+            tool_choice={"type": "tool", "name": _TOOL_NAME},
+            messages=[{"role": "user", "content": _user_prompt(signals)}],
+        )
+        for block in resp.content:
+            if getattr(block, "type", None) == "tool_use" and block.name == _TOOL_NAME:
+                return dict(block.input)
+        raise _Fault("malformed", "no tool_use block in response")
+
+    return call
+
+
+def _groq_call_fn(model: str, api_key: str):
+    """Groq via its OpenAI-compatible endpoint (stdlib only). temperature=0."""
+    import urllib.request
+
+    def call(signals: dict[str, object]) -> dict:
+        body = json.dumps({
+            "model": model, "temperature": 0,
+            "messages": [{"role": "system", "content": SYSTEM},
+                         {"role": "user", "content": _user_prompt(signals)}],
+            "tools": [{"type": "function", "function": {
+                "name": _TOOL_NAME, "description": TOOL["description"],
+                "parameters": TOOL["input_schema"]}}],
+            "tool_choice": {"type": "function", "function": {"name": _TOOL_NAME}},
+        }).encode()
+        req = urllib.request.Request(
+            "https://api.groq.com/openai/v1/chat/completions", data=body,
+            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=30) as r:
+            data = json.loads(r.read())
+        args = data["choices"][0]["message"]["tool_calls"][0]["function"]["arguments"]
+        return json.loads(args)
+
+    return call
+
+
+def _default_backend(model: str | None) -> tuple[object | None, str]:
+    """Pick a backend from the environment. Groq first (free tier), then Anthropic,
+    then None (offline: cache/fixtures only, no network). Returns (call_fn, model)."""
+    override = os.getenv("RECOVERY_OS_LLM_MODEL")
+    gk = os.getenv("GROQ_API_KEY")
+    if gk:
+        m = model or override or "llama-3.3-70b-versatile"
+        return _groq_call_fn(m, gk), m
+    if os.getenv("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_AUTH_TOKEN"):
+        m = model or override or "claude-opus-5"
+        try:
+            return _anthropic_call_fn(m), m
+        except Exception:
+            pass
+    return None, model or override or "claude-opus-5"
 
 
 class _Fault(Exception):
@@ -109,12 +163,14 @@ _UNSET = object()
 
 
 class LLMProposer:
-    def __init__(self, client=_UNSET, model: str | None = None,
+    def __init__(self, call_fn=_UNSET, model: str | None = None,
                  cache_dir: str | None = None, db_path: str | None = None):
-        # client=None explicitly forces "no client" (offline); omitting it resolves
-        # a default client only when a key is present.
-        self.client = _default_client() if client is _UNSET else client
-        self.model = model or "claude-opus-5"
+        # call_fn=None explicitly forces offline (cache/fixtures only). Omitting it
+        # resolves a backend (Groq or Anthropic) from the environment, else offline.
+        if call_fn is _UNSET:
+            self.call_fn, self.model = _default_backend(model)
+        else:
+            self.call_fn, self.model = call_fn, (model or "claude-opus-5")
         self.cache_dir = Path(
             cache_dir or os.getenv("RECOVERY_OS_LLM_CACHE_DIR") or "llm_cache")
         self.db_path = db_path
@@ -133,22 +189,6 @@ class LLMProposer:
     def _cache_set(self, key: str, raw: dict) -> None:
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self._cache_path(key).write_text(json.dumps(raw, sort_keys=True, indent=2))
-
-    # --- the one call ------------------------------------------------------
-    def _call_api(self, signals: dict[str, object]) -> dict:
-        resp = self.client.messages.create(
-            model=self.model,
-            max_tokens=1024,
-            output_config={"effort": "low"},
-            system=SYSTEM,
-            tools=[TOOL],
-            tool_choice={"type": "tool", "name": _TOOL_NAME},
-            messages=[{"role": "user", "content": _user_prompt(signals)}],
-        )
-        for block in resp.content:
-            if getattr(block, "type", None) == "tool_use" and block.name == _TOOL_NAME:
-                return dict(block.input)
-        raise _Fault("malformed", "no tool_use block in response")
 
     def _validate(self, raw: dict, episode: Episode) -> tuple[Diagnosis, ProposedAction]:
         try:
@@ -188,13 +228,13 @@ class LLMProposer:
         try:
             raw = self._cache_get(key)
             if raw is None:
-                if self.client is None:
-                    raise _Fault("cache_miss", "no cached response and no API client")
+                if self.call_fn is None:
+                    raise _Fault("cache_miss", "no cached response and no backend")
                 try:
-                    raw = self._call_api(signals)
+                    raw = self.call_fn(signals)
                 except _Fault:
                     raise
-                except Exception as e:  # any SDK/network error
+                except Exception as e:  # any network/SDK/parse error
                     raise _Fault("api_error", str(e))
                 self._cache_set(key, raw)
             result = self._validate(raw, episode)
