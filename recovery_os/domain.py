@@ -141,3 +141,26 @@ class Attribution(BaseModel):
     counterfactual: str  # what we assume would have happened with no action
     incremental: bool  # recovery attributable to the action vs. would-recover-anyway
     note: str = ""
+
+
+class RunReport(BaseModel):
+    """Flat summary of one episode's run. Scorecard rows aggregate these later."""
+    episode_id: str
+    cause: FailureCause
+    intervention: Intervention
+    policy_status: PolicyStatus
+    rule_fired: str | None
+    executed: ExecStatus | None  # None if the gate blocked before execution
+    recovered: bool
+
+
+# Canonical provider error codes per cause — shared vocabulary so the simulator
+# emits them and diagnosis reads them back (mimics diagnosing from real signals).
+ERROR_CODES: dict[FailureCause, str] = {
+    FailureCause.issuer_downtime: "GATEWAY_ERROR",
+    FailureCause.insufficient_funds: "BAD_REQUEST_ERROR:insufficient_balance",
+    FailureCause.expired_instrument: "BAD_REQUEST_ERROR:card_expired",
+    FailureCause.network_error: "GATEWAY_TIMEOUT",
+    FailureCause.abandonment: "PAYMENT_ABANDONED",
+    FailureCause.mandate_failure: "MANDATE_REVOKED",
+}
