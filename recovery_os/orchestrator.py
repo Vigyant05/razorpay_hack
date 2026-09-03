@@ -32,7 +32,9 @@ from .domain import (
 from .policy import PolicyEngine
 from .providers import PaymentProvider, get_provider
 
-# The strategy seam: a policy maps (diagnosis, episode) -> action.
+# The strategy seams: diagnosis and proposal. The LLM (or a heuristic) plugs in
+# here; the deterministic gate/sign/execute path downstream is identical either way.
+Diagnoser = Callable[[Episode], Diagnosis]
 Proposer = Callable[[Diagnosis, Episode], ProposedAction]
 
 _CAUSE_BY_CODE = {code: cause for cause, code in ERROR_CODES.items()}
@@ -87,22 +89,25 @@ def run_episode(
     payment_id: str,
     provider: PaymentProvider | None = None,
     engine: PolicyEngine | None = None,
+    diagnoser: Diagnoser | None = None,
     proposer: Proposer | None = None,
     db_path: str | None = None,
 ) -> RunReport:
     """Run the full recovery loop for one failed payment. Reproducible per seed.
 
-    `proposer` is the strategy seam (invariant #1): swap in a baseline policy or,
-    later, the LLM proposer. Defaults to the cause-aware heuristic `propose`.
+    `diagnoser`/`proposer` are the strategy seams (invariant #1): swap in the LLM
+    or a baseline policy. Both default to the cause-aware heuristics. The LLM only
+    proposes here — the gate/sign/execute path below is identical for any source.
     """
     provider = provider or get_provider()  # one instance: holds the episode's state
     engine = engine or PolicyEngine()
+    diagnoser = diagnoser or diagnose
     proposer = proposer or propose
 
     episode = provider.fetch_payment(payment_id)
     ledger.append(episode.episode_id, LedgerStep.episode, episode, db_path=db_path)
 
-    diagnosis = diagnose(episode)
+    diagnosis = diagnoser(episode)
     ledger.append(episode.episode_id, LedgerStep.diagnosis, diagnosis, db_path=db_path)
 
     action = proposer(diagnosis, episode)

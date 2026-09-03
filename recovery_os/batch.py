@@ -76,6 +76,7 @@ def run_batch(
     seed: int,
     control_frac: float = 0.2,
     policy: str = "agent",
+    proposer_kind: str = "heuristic",  # "heuristic" | "llm"
     db_path: str | None = None,
 ) -> Scorecard:
     if policy not in POLICIES:
@@ -86,13 +87,27 @@ def run_batch(
     control_ids = _control_ids(payment_ids, seed, control_frac, provider)
     treatment_proposer = POLICIES[policy]
 
+    # The LLM drives diagnosis+proposal on TREATMENT episodes only (control does
+    # nothing; baselines are deterministic) — that bounds the call count.
+    llm = None
+    if proposer_kind == "llm":
+        if policy != "agent":
+            raise ValueError("proposer_kind='llm' only applies to the agent policy")
+        from .llm import LLMProposer
+        llm = LLMProposer(db_path=db_path)
+
     reports = []
     for pid in payment_ids:
         is_control = f"ep_{pid}" in control_ids
-        proposer = _CONTROL_PROPOSER if is_control else treatment_proposer
+        if is_control:
+            diagnoser, proposer = None, _CONTROL_PROPOSER  # heuristic diagnose + do_nothing
+        elif llm is not None:
+            diagnoser, proposer = llm.diagnose, llm.propose
+        else:
+            diagnoser, proposer = None, treatment_proposer
         reports.append(
             run_episode(pid, provider=provider, engine=engine,
-                        proposer=proposer, db_path=db_path)
+                        diagnoser=diagnoser, proposer=proposer, db_path=db_path)
         )
     return build(policy, seed, control_frac, reports, control_ids)
 

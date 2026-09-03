@@ -15,6 +15,8 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("info", help="print active config")
     p_run = sub.add_parser("run", help="run the recovery loop for one payment")
     p_run.add_argument("payment_id", help="e.g. pay_ABC123")
+    p_run.add_argument("--proposer", default="heuristic", choices=["heuristic", "llm"],
+                       help="diagnosis/proposal source (default heuristic)")
 
     p_batch = sub.add_parser("batch", help="run a seeded batch + scorecard")
     p_batch.add_argument("--n", type=int, default=100, help="number of episodes")
@@ -22,6 +24,8 @@ def main(argv: list[str] | None = None) -> int:
     p_batch.add_argument("--control-frac", type=float, default=0.2, dest="control_frac")
     p_batch.add_argument("--policy", default="agent",
                          choices=["agent", "immediate", "fixed_schedule", "never"])
+    p_batch.add_argument("--proposer", default="heuristic", choices=["heuristic", "llm"],
+                         help="agent proposer source (default heuristic)")
     p_batch.add_argument("--compare", action="store_true",
                          help="run all four policies side by side")
     p_batch.add_argument("--out", help="write the full scorecard(s) to JSON")
@@ -40,7 +44,8 @@ def main(argv: list[str] | None = None) -> int:
                 print("\n" + to_table(card))
             payload = cmp
         else:
-            card = run_batch(args.n, args.seed, args.control_frac, args.policy, db_path=args.db)
+            card = run_batch(args.n, args.seed, args.control_frac, args.policy,
+                             proposer_kind=args.proposer, db_path=args.db)
             print(to_table(card))
             payload = card
 
@@ -53,7 +58,13 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "run":
         from .orchestrator import run_episode
 
-        report = run_episode(args.payment_id)
+        diagnoser = proposer = None
+        if args.proposer == "llm":
+            from .llm import LLMProposer
+            llm = LLMProposer(db_path=get_settings().db_path)
+            diagnoser, proposer = llm.diagnose, llm.propose
+
+        report = run_episode(args.payment_id, diagnoser=diagnoser, proposer=proposer)
         print(f"episode      : {report.episode_id}")
         print(f"  cause      : {report.cause.value}")
         print(f"  action     : {report.intervention.value}")

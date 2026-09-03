@@ -1,0 +1,7 @@
+{
+  "cause": "banana",
+  "confidence": 0.5,
+  "diagnosis_rationale": "nonsense",
+  "intervention": "smart_retry",
+  "proposal_rationale": "nonsense"
+}

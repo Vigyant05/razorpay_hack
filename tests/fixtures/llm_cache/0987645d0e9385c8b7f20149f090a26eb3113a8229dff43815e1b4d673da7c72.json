@@ -1,0 +1,7 @@
+{
+  "cause": "issuer_downtime",
+  "confidence": 0.9,
+  "diagnosis_rationale": "GATEWAY_ERROR indicates the issuing bank was down",
+  "intervention": "smart_retry",
+  "proposal_rationale": "transient; retry once the bank recovers"
+}

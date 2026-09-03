@@ -1,0 +1,7 @@
+{
+  "cause": "issuer_downtime",
+  "confidence": 0.8,
+  "diagnosis_rationale": "same signal, larger amount",
+  "intervention": "smart_retry",
+  "proposal_rationale": "retry"
+}

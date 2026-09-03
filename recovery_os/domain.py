@@ -56,6 +56,7 @@ class LedgerStep(str, Enum):
     execution = "execution"
     verification = "verification"
     attribution = "attribution"
+    fault = "fault"  # an LLM diagnosis/proposal fault; fell back to the heuristic
 
 
 # --- models ------------------------------------------------------------------
@@ -142,6 +143,14 @@ class Attribution(BaseModel):
     counterfactual: str  # what we assume would have happened with no action
     incremental: bool  # recovery attributable to the action vs. would-recover-anyway
     note: str = ""
+
+
+class DiagnosisFault(BaseModel):
+    """Logged when the LLM proposer's output is unusable and we fall back."""
+    episode_id: str
+    reason: str  # api_error | cache_miss | off_enum | malformed
+    raw_excerpt: str = ""  # short, truncated snapshot of what went wrong
+    fell_back_to: str = "heuristic"
 
 
 class RunReport(BaseModel):
