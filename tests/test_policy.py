@@ -18,8 +18,8 @@ def _retry() -> ProposedAction:
 
 
 def test_over_ceiling_is_blocked():
-    engine = PolicyEngine()  # default ceiling 50_000
-    decision = engine.decide(_retry(), _episode(amount=60_000))
+    engine = PolicyEngine()  # default ceiling 72_000
+    decision = engine.decide(_retry(), _episode(amount=80_000))
     assert decision.status is PolicyStatus.blocked
     assert decision.rule_fired == "amount_ceiling"
 
@@ -40,6 +40,6 @@ def test_max_attempts_blocks():
 def test_gate_cannot_be_bypassed():
     """The blocked decision cannot be turned into a mandate -> execute() is unreachable."""
     engine = PolicyEngine()
-    decision = engine.decide(_retry(), _episode(amount=60_000))
+    decision = engine.decide(_retry(), _episode(amount=80_000))
     with pytest.raises(PolicyViolation):
         issue_mandate(decision, key=Ed25519PrivateKey.generate())

@@ -8,6 +8,7 @@ into a Scorecard. Simulator-only: you cannot batch-replay real payments.
 from __future__ import annotations
 
 import hashlib
+from collections import defaultdict
 
 from .config import FIXED_SCHEDULE_ATTEMPTS
 from .domain import Diagnosis, Episode, Intervention, ProposedAction
@@ -47,14 +48,25 @@ _CONTROL_PROPOSER = _never  # control arm always gets do_nothing
 
 # --- holdout assignment ------------------------------------------------------
 
-def _control_ids(n: int, seed: int, control_frac: float) -> set[str]:
-    """Deterministic holdout: rank episodes by a seeded hash, take the first slice."""
-    order = sorted(
-        range(n),
-        key=lambda i: hashlib.sha256(f"{seed}:assign:{i}".encode()).hexdigest(),
-    )
-    n_control = round(control_frac * n)
-    return {f"ep_pay_{seed}_{i}" for i in order[:n_control]}
+def _rank_key(seed: int, payment_id: str) -> str:
+    return hashlib.sha256(f"{seed}:assign:{payment_id}".encode()).hexdigest()
+
+
+def _control_ids(
+    payment_ids: list[str], seed: int, control_frac: float, provider: SimulatedProvider
+) -> set[str]:
+    """Stratified holdout: assign control WITHIN each cause so treatment and
+    control share the same cause mix. Seeded and reproducible."""
+    by_cause: dict[object, list[str]] = defaultdict(list)
+    for pid in payment_ids:
+        by_cause[provider.peek_cause(pid)].append(pid)
+
+    control: set[str] = set()
+    for pids in by_cause.values():
+        ordered = sorted(pids, key=lambda p: _rank_key(seed, p))
+        k = round(control_frac * len(pids))
+        control.update(f"ep_{p}" for p in ordered[:k])
+    return control
 
 
 # --- runner ------------------------------------------------------------------
@@ -70,12 +82,12 @@ def run_batch(
         raise ValueError(f"unknown policy {policy!r}; choose one of {list(POLICIES)}")
     provider = SimulatedProvider(seed=seed)  # one instance holds all episode state
     engine = PolicyEngine()
-    control_ids = _control_ids(n, seed, control_frac)
+    payment_ids = [f"pay_{seed}_{i}" for i in range(n)]
+    control_ids = _control_ids(payment_ids, seed, control_frac, provider)
     treatment_proposer = POLICIES[policy]
 
     reports = []
-    for i in range(n):
-        pid = f"pay_{seed}_{i}"
+    for pid in payment_ids:
         is_control = f"ep_{pid}" in control_ids
         proposer = _CONTROL_PROPOSER if is_control else treatment_proposer
         reports.append(

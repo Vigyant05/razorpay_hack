@@ -30,6 +30,12 @@ SELF_RECOVERY: dict[FailureCause, float] = {
 # Retry attempts a fixed-schedule dunning policy fires per episode.
 FIXED_SCHEDULE_ATTEMPTS = 3
 
+# Simulated failed-payment amount range (paise), uniform. Tunable here. With the
+# 72_000 auto-approval ceiling below, ~10% of the range sits above it, so the
+# gate blocks a realistic minority rather than a third of the batch.
+AMOUNT_MIN_PAISE = 5_000
+AMOUNT_MAX_PAISE = 80_000
+
 ASSUMPTIONS_NOTE = (
     "Self-recovery rates are modeling assumptions, not measured facts "
     "(conservative priors from published dunning benchmarks: Recurly ~53% "
@@ -44,7 +50,7 @@ class Settings(BaseSettings):
     seed: int = 42
     db_path: str = "recovery_os.db"
     key_path: str = "ed25519_key.pem"
-    max_auto_amount: int = 50_000  # minor units (paise); ceiling for auto-approval
+    max_auto_amount: int = 72_000  # paise; auto-approval ceiling (~10% of the amount range blocks)
     max_attempts: int = 3
     provider: str = "simulated"  # "simulated" | "razorpay_test"
 

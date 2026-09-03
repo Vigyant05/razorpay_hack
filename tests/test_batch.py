@@ -1,4 +1,6 @@
-from recovery_os.batch import POLICIES, run_batch
+from collections import defaultdict
+
+from recovery_os.batch import POLICIES, _control_ids, _never, run_batch
 from recovery_os.domain import (
     ExecStatus,
     FailureCause,
@@ -6,6 +8,9 @@ from recovery_os.domain import (
     PolicyStatus,
     RunReport,
 )
+from recovery_os.orchestrator import run_episode
+from recovery_os.policy import PolicyEngine
+from recovery_os.providers import SimulatedProvider
 from recovery_os.scorecard import build
 
 
@@ -68,3 +73,45 @@ def test_incremental_math_handchecked():
     assert s.false_effort_actions == 1
     assert s.false_effort_amount_paise == 10_000
     assert s.exceptions == []
+
+
+def test_do_nothing_scored_as_self_recovery():
+    """A do_nothing episode realizes its self-recovery outcome (not a failure)."""
+    prov = SimulatedProvider(seed=5)
+    pid = "pay_5_0"
+    eid = f"ep_{pid}"
+    expected = prov._self_recovers(eid, prov.peek_cause(pid))
+    r = run_episode(pid, provider=prov, engine=PolicyEngine(), proposer=_never)
+    assert r.intervention is Intervention.do_nothing
+    assert r.executed is ExecStatus.success  # no-op executed, never blocked
+    assert r.recovered == expected
+
+
+def test_gate_blocked_excluded_from_denominator_but_in_exceptions():
+    reports = [
+        _report("t_ok", True),  # treatment, approved, recovered
+        RunReport(  # treatment, gate-blocked
+            episode_id="t_blk", cause=FailureCause.issuer_downtime,
+            intervention=Intervention.smart_retry, amount=90_000,
+            policy_status=PolicyStatus.blocked, rule_fired="amount_ceiling",
+            executed=None, recovered=False,
+        ),
+        _report("c0", False, Intervention.do_nothing),  # control
+    ]
+    s = build("agent", seed=1, control_frac=0.5, reports=reports, control_ids={"c0"})
+    cs = s.per_cause[0]
+    assert cs.n_treatment == 1 and cs.n_blocked == 1  # blocked not in the denominator
+    assert cs.treatment_recovery_rate == 1.0  # 1/1, not 1/2
+    assert s.n_blocked == 1
+    assert len(s.exceptions) == 1 and "gate_blocked" in s.exceptions[0].reason
+
+
+def test_stratified_holdout_matches_cause_mix():
+    prov = SimulatedProvider(seed=42)
+    pids = [f"pay_42_{i}" for i in range(100)]
+    ctrl = _control_ids(pids, 42, 0.2, prov)
+    counts: dict[FailureCause, list[int]] = defaultdict(lambda: [0, 0])  # [control, treat]
+    for pid in pids:
+        counts[prov.peek_cause(pid)][0 if f"ep_{pid}" in ctrl else 1] += 1
+    for n_c, n_t in counts.values():
+        assert n_c == round(0.2 * (n_c + n_t))  # exact per-cause fraction

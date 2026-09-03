@@ -14,7 +14,7 @@ import hashlib
 import random
 from typing import Protocol
 
-from .config import SELF_RECOVERY, get_settings
+from .config import AMOUNT_MAX_PAISE, AMOUNT_MIN_PAISE, SELF_RECOVERY, get_settings
 from .domain import (
     ERROR_CODES,
     Episode,
@@ -88,6 +88,11 @@ class SimulatedProvider(_GatedProvider):
         """Latent, seeded draw: would this failure have recovered with no action?"""
         return self._seeded(f"self:{episode_id}").random() < SELF_RECOVERY[cause]
 
+    def peek_cause(self, payment_id: str) -> FailureCause:
+        """The cause fetch_payment will assign — same seeded draw, no state/ledger
+        write. Lets the batch runner stratify the holdout by cause up front."""
+        return self._seeded(f"fetch:{payment_id}").choice(list(FailureCause))
+
     def fetch_payment(self, payment_id: str) -> Episode:
         r = self._seeded(f"fetch:{payment_id}")
         cause = r.choice(list(FailureCause))
@@ -97,7 +102,7 @@ class SimulatedProvider(_GatedProvider):
             episode_id=episode_id,
             payment_id=payment_id,
             customer_id=f"cust_{r.randrange(1000, 9999)}",
-            amount=r.randrange(5_000, 80_000, 100),  # paise; some exceed the ceiling
+            amount=r.randrange(AMOUNT_MIN_PAISE, AMOUNT_MAX_PAISE, 100),
             method=r.choice(["card", "upi", "netbanking"]),
             raw_error_code=ERROR_CODES[cause],
             attempt=1,
