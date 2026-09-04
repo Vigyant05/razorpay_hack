@@ -67,16 +67,27 @@ export interface TraceStep {
   signature: string | null;
 }
 
+export interface AskFile {
+  groq_available: boolean;
+  model: string;
+  entries: AskEntry[];
+}
+
+export interface Narration {
+  answer: string;
+  model?: string;
+}
+
 export interface AskEntry {
   question: string;
-  answer: string;
   matched: number;
   cited_episode_ids: string[];
-  used_llm: boolean;
-  translation_fallback: boolean;
-  narration_fallback: boolean;
   filter: Record<string, unknown>;
   rows: AskRow[];
+  narration: {
+    deterministic: Narration;
+    groq: Narration | null; // null when exported without a key
+  };
 }
 
 export interface AskRow {

@@ -3,21 +3,21 @@ import { Activity, BarChart3, MessagesSquare, ShieldCheck } from "lucide-react";
 import { Trace } from "./views/Trace";
 import { Scorecard } from "./views/Scorecard";
 import { Ask } from "./views/Ask";
-import type { AskEntry, Comparison, TraceFile } from "./types";
+import type { AskFile, Comparison, TraceFile } from "./types";
 import scorecardJson from "./data/scorecard.json";
 import traceJson from "./data/trace.json";
 import askJson from "./data/ask.json";
 
 const comparison = scorecardJson as unknown as Comparison;
 const traceData = traceJson as unknown as TraceFile;
-const askData = askJson as unknown as AskEntry[];
+const askData = askJson as unknown as AskFile;
 
 type ViewId = "trace" | "scorecard" | "ask";
 
 const NAV: { id: ViewId; label: string; icon: typeof Activity; count: string }[] = [
   { id: "trace", label: "Live Trace", icon: Activity, count: String(traceData.episodes.length) },
   { id: "scorecard", label: "Scorecard", icon: BarChart3, count: String(comparison.scorecards.length) },
-  { id: "ask", label: "Ask", icon: MessagesSquare, count: String(askData.length) },
+  { id: "ask", label: "Ask", icon: MessagesSquare, count: String(askData.entries.length) },
 ];
 
 export function App() {

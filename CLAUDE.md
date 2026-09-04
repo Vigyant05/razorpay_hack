@@ -45,11 +45,27 @@ assumptions in `config.py`. Do not headline raw recovery.
 - Small, single-responsibility modules. Simple over clever.
 - Ask before adding scope/deps.
 
+## RAG Q&A (Phase 4) — READ-ONLY
+`rag.py` answers NL questions over the ledger. Retrieval is deterministic: rebuild
+each episode into a typed `EpisodeView`, filter over real fields. The LLM only
+translates the question to a typed `LedgerFilter` and narrates the retrieved rows,
+citing episode ids — no row, no claim; invented citations are dropped. Reuses the
+`llm.py` `call_fn`/cache/fallback (keyword filter + template narrator offline). It
+never writes to the ledger or changes any Phase 0–3 contract.
+
+## Dashboard (`dashboard/`) — READ-ONLY viewer
+React+Vite+TS app over three committed JSON exports (trace, scorecard, ask). No
+recovery logic, no pipeline, no live calls — it renders what the backend produced.
+`dashboard/export.py` reshapes a seeded ledger + scorecard into `src/data/*.json`
+(deterministic; uses a Groq key from `.env` only to add a second Ask narration).
+Do not put backend logic in the frontend.
+
 ## Module map
 `config` settings+RNG+assumptions · `domain` enums+models · `signing` gate+ed25519 ·
 `policy` rules · `providers` adapter+simulator · `ledger` audit store ·
 `orchestrator` run loop + heuristic seams · `batch` runner+holdout ·
-`scorecard` incremental math+tables · `llm` cached LLM proposer · `cli`/`api` entries.
+`scorecard` incremental math+tables · `llm` cached backend + proposer ·
+`rag` read-only ledger Q&A · `cli`/`api` entries.
 
 ## Domain vocabulary
 Failure causes: issuer_downtime, insufficient_funds, expired_instrument,
@@ -58,5 +74,5 @@ Interventions: smart_retry, method_switch, mandate_reauth, customer_nudge,
 human_escalation, do_nothing.
 
 ## Deliberately NOT built yet
-RAG Q&A over the ledger, vernacular nudges, dispute-defense, real Razorpay API
-calls (`RazorpayTestProvider` is still a stub).
+Vernacular nudges, dispute-defense, real Razorpay API calls
+(`RazorpayTestProvider` is still a stub).

@@ -1,21 +1,28 @@
 import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
-import type { AskEntry, AskRow } from "../types";
+import type { AskEntry, AskFile, AskRow } from "../types";
 import { titleCase } from "../format";
 
-export function Ask({ data }: { data: AskEntry[] }) {
+type Mode = "deterministic" | "groq";
+
+export function Ask({ data }: { data: AskFile }) {
   const [q, setQ] = useState("");
   const [sel, setSel] = useState(0);
+  const [mode, setMode] = useState<Mode>(data.groq_available ? "groq" : "deterministic");
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    return data
+    return data.entries
       .map((e, i) => ({ e, i }))
-      .filter(({ e }) => !needle || e.question.toLowerCase().includes(needle)
-        || e.answer.toLowerCase().includes(needle));
+      .filter(({ e }) =>
+        !needle ||
+        e.question.toLowerCase().includes(needle) ||
+        e.narration.deterministic.answer.toLowerCase().includes(needle));
   }, [q, data]);
 
-  const active = data[sel];
+  const active: AskEntry = data.entries[sel];
+  const groq = active.narration.groq;
+  const shown = mode === "groq" && groq ? groq.answer : active.narration.deterministic.answer;
 
   return (
     <div className="view">
@@ -23,8 +30,9 @@ export function Ask({ data }: { data: AskEntry[] }) {
         <div className="eyebrow">Ask</div>
         <h1 className="view__title">Question the ledger</h1>
         <p className="view__desc">
-          Retrieval is deterministic — a typed filter over ledger fields. The model only phrases the rows
-          it was given, and every answer cites the exact episodes behind it. Saved answers; no live calls.
+          Retrieval is deterministic — a typed filter over ledger fields. Both narrators phrase the same
+          retrieved rows: the offline template, and {data.model}. The rows never change; only the wording
+          does. Saved answers; no live calls here.
         </p>
       </div>
 
@@ -55,20 +63,38 @@ export function Ask({ data }: { data: AskEntry[] }) {
 
         <div>
           <div className="answer__q">{active.question}</div>
+
           <div className="answer__meta">
             <span className="pill brass">{active.matched} matched</span>
-            <span className={`pill ${active.used_llm ? "ok" : ""}`}>
-              {active.used_llm ? "llm narrated" : "deterministic"}
-            </span>
-            {active.translation_fallback && <span className="pill fault">keyword filter</span>}
-            {active.narration_fallback && <span className="pill fault">template narrator</span>}
+            <div className="toggle" role="tablist" aria-label="Narrator">
+              <button
+                role="tab"
+                aria-selected={mode === "deterministic"}
+                className={`toggle__opt${mode === "deterministic" ? " is-on" : ""}`}
+                onClick={() => setMode("deterministic")}
+              >
+                Deterministic
+              </button>
+              <button
+                role="tab"
+                aria-selected={mode === "groq"}
+                className={`toggle__opt${mode === "groq" ? " is-on" : ""}`}
+                onClick={() => groq && setMode("groq")}
+                disabled={!groq}
+                title={groq ? undefined : "Re-run export.py with GROQ_API_KEY to add this"}
+              >
+                Groq
+              </button>
+            </div>
+            {mode === "groq" && groq && <span className="pill ok">{groq.model}</span>}
+            {mode === "deterministic" && <span className="pill">template narrator</span>}
           </div>
 
-          <div className="answer__body">{active.answer}</div>
+          <div className="glass answer__body">{shown}</div>
 
           <div className="section-label cited-label">
             <span className="eyebrow">Cited ledger rows</span>
-            <span className="hint">the grounding — no row, no claim</span>
+            <span className="hint">the grounding — identical for both narrators; no row, no claim</span>
           </div>
           <CitedRows rows={active.rows} />
         </div>
@@ -80,7 +106,7 @@ export function Ask({ data }: { data: AskEntry[] }) {
 function CitedRows({ rows }: { rows: AskRow[] }) {
   if (rows.length === 0) return <div className="ask-empty">No matching ledger records.</div>;
   return (
-    <div className="table-wrap">
+    <div className="table-wrap glass">
       <table className="data">
         <thead>
           <tr>

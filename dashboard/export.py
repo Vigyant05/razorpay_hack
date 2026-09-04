@@ -24,11 +24,6 @@ OUT = Path(__file__).resolve().parent / "src" / "data"
 SEED, N = 42, 60
 
 
-def _force_offline() -> None:
-    for k in ("GROQ_API_KEY", "ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN"):
-        os.environ.pop(k, None)
-
-
 def _rows(db: str):
     c = sqlite3.connect(db)
     out = defaultdict(list)
@@ -91,28 +86,49 @@ def build_trace(llm_db: str, heur_db: str) -> dict:
     return {"seed": SEED, "episodes": episodes}
 
 
-def build_ask(db: str) -> list[dict]:
-    from recovery_os.rag import ask, build_views, query
-    os.environ["RECOVERY_OS_LLM_CACHE_DIR"] = db + ".empty"
-    views = build_views(db)
-    questions = [
-        "why did the agent act on ep_pay_42_0?",
-        "show every episode the agent refused to act on and why",
-        "which episodes had an LLM fault and what happened?",
-        "list every gate-blocked action and the rule that blocked it",
-        "what did the agent do for insufficient_funds cases?",
-    ]
-    out = []
-    for q in questions:
-        r = ask(q, db_path=db)
-        rows = query(r.filter, views)
-        out.append({**r.model_dump(mode="json"),
-                    "rows": [v.model_dump(mode="json", exclude_none=True) for v in rows]})
-    return out
+QUESTIONS = [
+    "why did the agent act on ep_pay_42_0?",
+    "show every episode the agent refused to act on and why",
+    "which episodes had an LLM fault and what happened?",
+    "list every gate-blocked action and the rule that blocked it",
+    "what did the agent do for insufficient_funds cases?",
+]
+
+
+def build_ask(db: str) -> dict:
+    """Same deterministic retrieval for every question; two narrations over the
+    SAME rows — the offline template narrator, and (if a key is present) Groq.
+    Grounding is identical; only the phrasing differs."""
+    from recovery_os import rag
+
+    cache = db + ".askcache"
+    views = rag.build_views(db)
+    call_fn, model = rag.resolve_backend()  # Groq/Anthropic if a key is set, else None
+
+    entries = []
+    for q in QUESTIONS:
+        f = rag.keyword_filter(q)  # deterministic filter -> stable rows for both narrators
+        rows = rag.query(f, views)
+        det = rag.deterministic_answer(q, rows)[0]
+        groq = None
+        if call_fn is not None and rows:
+            ans, _cited, used_llm, nfb = rag.narrate(q, rows, call_fn, model, Path(cache))
+            if used_llm and not nfb:
+                groq = {"answer": ans, "model": model}
+        entries.append({
+            "question": q,
+            "filter": f.model_dump(mode="json"),
+            "matched": len(rows),
+            "cited_episode_ids": [v.episode_id for v in rows],
+            "rows": [v.model_dump(mode="json", exclude_none=True) for v in rows],
+            "narration": {"deterministic": {"answer": det}, "groq": groq},
+        })
+    return {"groq_available": call_fn is not None, "model": model, "entries": entries}
 
 
 def main() -> None:
-    _force_offline()
+    from recovery_os.config import load_env_file
+    load_env_file()  # pick up GROQ_API_KEY from .env for the Groq narration
     OUT.mkdir(parents=True, exist_ok=True)
     tmp = OUT / "_build"
     tmp.mkdir(exist_ok=True)
