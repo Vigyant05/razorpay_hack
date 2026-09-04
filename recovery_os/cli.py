@@ -19,6 +19,10 @@ def main(argv: list[str] | None = None) -> int:
     p_run.add_argument("--proposer", default="heuristic", choices=["heuristic", "llm"],
                        help="diagnosis/proposal source (default heuristic)")
 
+    p_ask = sub.add_parser("ask", help="natural-language Q&A over the audit ledger")
+    p_ask.add_argument("question")
+    p_ask.add_argument("--db", default="batch.db", help="ledger db to query")
+
     p_batch = sub.add_parser("batch", help="run a seeded batch + scorecard")
     p_batch.add_argument("--n", type=int, default=100, help="number of episodes")
     p_batch.add_argument("--seed", type=int, default=42)
@@ -54,6 +58,16 @@ def main(argv: list[str] | None = None) -> int:
             with open(args.out, "w") as f:
                 f.write(payload.model_dump_json(indent=2))
             print(f"\nwrote {args.out}")
+        return 0
+
+    if args.command == "ask":
+        from .rag import ask
+
+        r = ask(args.question, db_path=args.db)
+        print(r.answer)
+        print(f"\n  matched {r.matched} episode(s)"
+              + (f" · cited: {', '.join(r.cited_episode_ids[:8])}" if r.cited_episode_ids else "")
+              + (" · [llm]" if r.used_llm else " · [deterministic]"))
         return 0
 
     if args.command == "run":

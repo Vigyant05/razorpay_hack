@@ -1,11 +1,10 @@
-"""LLM proposer (phase 3). Claude proposes; the deterministic engine disposes.
+"""LLM backend + phase-3 proposer. Claude/Groq propose; the engine disposes.
 
-The model outputs a typed Diagnosis + ProposedAction via a strict tool schema.
-It NEVER executes, signs, or bypasses the gate — its output is untrusted input
-to the same policy path a heuristic proposal takes. Determinism + zero-cost CI
-come from a disk record-replay cache keyed by a hash of the episode inputs; on
-any fault (API error, cache miss with no key, off-enum, malformed) it logs a
-fault to the ledger and falls back to the heuristic proposer.
+The backend is a generic one-forced-tool call `call_fn(system, user, tool) -> dict`
+(Groq or Anthropic), wrapped by a disk record-replay cache so runs are
+deterministic and free after the first pass. Phase 3 (LLMProposer) and phase 4
+(rag) both reuse this. Any fault (API error, cache miss with no backend, off-enum,
+malformed) is caught by the caller, which falls back to a deterministic path.
 """
 
 from __future__ import annotations
@@ -29,6 +28,123 @@ from .orchestrator import diagnose as heuristic_diagnose
 from .orchestrator import propose as heuristic_propose
 
 SCHEMA_VERSION = 1
+
+
+class _Fault(Exception):
+    def __init__(self, reason: str, excerpt: str = ""):
+        self.reason = reason
+        self.excerpt = excerpt[:200]
+
+
+# --- generic backends: call_fn(system, user, tool) -> tool-input dict ---------
+
+def _anthropic_call_fn(model: str):
+    import anthropic
+    client = anthropic.Anthropic()
+
+    def call(system: str, user: str, tool: dict) -> dict:
+        resp = client.messages.create(
+            model=model, max_tokens=1024, output_config={"effort": "low"},
+            system=system, tools=[tool],
+            tool_choice={"type": "tool", "name": tool["name"]},
+            messages=[{"role": "user", "content": user}],
+        )
+        for block in resp.content:
+            if getattr(block, "type", None) == "tool_use" and block.name == tool["name"]:
+                return dict(block.input)
+        raise _Fault("malformed", "no tool_use block in response")
+
+    return call
+
+
+def _groq_call_fn(model: str, api_key: str):
+    """Groq via its OpenAI-compatible endpoint (stdlib only). temperature=0."""
+    import time
+    import urllib.error
+    import urllib.request
+
+    def call(system: str, user: str, tool: dict) -> dict:
+        body = json.dumps({
+            "model": model, "temperature": 0,
+            "messages": [{"role": "system", "content": system},
+                         {"role": "user", "content": user}],
+            "tools": [{"type": "function", "function": {
+                "name": tool["name"], "description": tool["description"],
+                "parameters": tool["input_schema"]}}],
+            "tool_choice": {"type": "function", "function": {"name": tool["name"]}},
+        }).encode()
+        req = urllib.request.Request(
+            "https://api.groq.com/openai/v1/chat/completions", data=body,
+            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json",
+                     # Groq's edge blocks the default Python-urllib UA (Cloudflare 1010).
+                     "User-Agent": "recovery-os/0.1"})
+        for attempt in range(4):  # retry the free-tier rate limit before giving up
+            try:
+                with urllib.request.urlopen(req, timeout=30) as r:
+                    data = json.loads(r.read())
+                break
+            except urllib.error.HTTPError as e:
+                if e.code == 429 and attempt < 3:
+                    wait = float(e.headers.get("retry-after") or 2)
+                    time.sleep(min(wait, 10))
+                    continue
+                raise _Fault("api_error", f"groq {e.code}: {e.read().decode()[:180]}")
+        args = data["choices"][0]["message"]["tool_calls"][0]["function"]["arguments"]
+        return json.loads(args)
+
+    return call
+
+
+def resolve_backend(model: str | None = None) -> tuple[object | None, str]:
+    """Pick a backend from the environment. Groq first (free tier), then Anthropic,
+    then None (offline: cache/fixtures only). Returns (call_fn, model)."""
+    override = os.getenv("RECOVERY_OS_LLM_MODEL")
+    if os.getenv("GROQ_API_KEY"):
+        # Groq rotates its catalog; override with RECOVERY_OS_LLM_MODEL if this id
+        # 404s (list via GET /openai/v1/models). gpt-oss-120b has strong tool use.
+        m = model or override or "openai/gpt-oss-120b"
+        return _groq_call_fn(m, os.environ["GROQ_API_KEY"]), m
+    if os.getenv("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_AUTH_TOKEN"):
+        m = model or override or "claude-opus-5"
+        try:
+            return _anthropic_call_fn(m), m
+        except Exception:
+            pass
+    return None, model or override or "claude-opus-5"
+
+
+# --- record-replay cache -----------------------------------------------------
+
+def default_cache_dir() -> Path:
+    return Path(os.getenv("RECOVERY_OS_LLM_CACHE_DIR") or "llm_cache")
+
+
+def cache_key(model: str, payload: dict) -> str:
+    blob = json.dumps({"v": SCHEMA_VERSION, "model": model, **payload}, sort_keys=True)
+    return hashlib.sha256(blob.encode()).hexdigest()
+
+
+def cached_tool_call(call_fn, model: str, cache_dir: Path, key_payload: dict,
+                     system: str, user: str, tool: dict) -> dict:
+    """Cache-first one-tool call. Raises _Fault on miss-without-backend or API error."""
+    p = Path(cache_dir) / f"{cache_key(model, key_payload)}.json"
+    if p.exists():
+        return json.loads(p.read_text())
+    if call_fn is None:
+        raise _Fault("cache_miss", "no cached response and no backend")
+    try:
+        raw = call_fn(system, user, tool)
+    except _Fault:
+        raise
+    except Exception as e:  # any network/SDK/parse error
+        raise _Fault("api_error", str(e))
+    Path(cache_dir).mkdir(parents=True, exist_ok=True)
+    p.write_text(json.dumps(raw, sort_keys=True, indent=2))
+    return raw
+
+
+# --- phase-3 proposer (unchanged behavior + cache keys) ----------------------
+
 _TOOL_NAME = "submit_recovery_plan"
 _CAUSES = [c.value for c in FailureCause]
 _INTERVENTIONS = [i.value for i in Intervention]
@@ -71,11 +187,6 @@ def _signals(episode: Episode) -> dict[str, object]:
     }
 
 
-def cache_key(model: str, signals: dict[str, object]) -> str:
-    blob = json.dumps({"v": SCHEMA_VERSION, "model": model, **signals}, sort_keys=True)
-    return hashlib.sha256(blob.encode()).hexdigest()
-
-
 def _user_prompt(signals: dict[str, object]) -> str:
     return (
         "A payment failed. Diagnose the cause and propose one intervention.\n"
@@ -88,93 +199,6 @@ def _user_prompt(signals: dict[str, object]) -> str:
     )
 
 
-# A call_fn maps the episode signals to the raw structured dict {cause, confidence,
-# diagnosis_rationale, intervention, proposal_rationale}. The rest of LLMProposer
-# (cache, validation, fallback, fault-logging) is backend-agnostic.
-
-def _anthropic_call_fn(model: str):
-    import anthropic
-    client = anthropic.Anthropic()
-
-    def call(signals: dict[str, object]) -> dict:
-        resp = client.messages.create(
-            model=model, max_tokens=1024, output_config={"effort": "low"},
-            system=SYSTEM, tools=[TOOL],
-            tool_choice={"type": "tool", "name": _TOOL_NAME},
-            messages=[{"role": "user", "content": _user_prompt(signals)}],
-        )
-        for block in resp.content:
-            if getattr(block, "type", None) == "tool_use" and block.name == _TOOL_NAME:
-                return dict(block.input)
-        raise _Fault("malformed", "no tool_use block in response")
-
-    return call
-
-
-def _groq_call_fn(model: str, api_key: str):
-    """Groq via its OpenAI-compatible endpoint (stdlib only). temperature=0."""
-    import time
-    import urllib.error
-    import urllib.request
-
-    def call(signals: dict[str, object]) -> dict:
-        body = json.dumps({
-            "model": model, "temperature": 0,
-            "messages": [{"role": "system", "content": SYSTEM},
-                         {"role": "user", "content": _user_prompt(signals)}],
-            "tools": [{"type": "function", "function": {
-                "name": _TOOL_NAME, "description": TOOL["description"],
-                "parameters": TOOL["input_schema"]}}],
-            "tool_choice": {"type": "function", "function": {"name": _TOOL_NAME}},
-        }).encode()
-        req = urllib.request.Request(
-            "https://api.groq.com/openai/v1/chat/completions", data=body,
-            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json",
-                     # Groq's edge blocks the default Python-urllib UA (Cloudflare 1010).
-                     "User-Agent": "recovery-os/0.1"})
-        for attempt in range(4):  # retry the free-tier rate limit before giving up
-            try:
-                with urllib.request.urlopen(req, timeout=30) as r:
-                    data = json.loads(r.read())
-                break
-            except urllib.error.HTTPError as e:
-                if e.code == 429 and attempt < 3:
-                    wait = float(e.headers.get("retry-after") or 2)
-                    time.sleep(min(wait, 10))
-                    continue
-                # surface Groq's JSON error body (e.g. decommissioned model)
-                raise _Fault("api_error", f"groq {e.code}: {e.read().decode()[:180]}")
-        args = data["choices"][0]["message"]["tool_calls"][0]["function"]["arguments"]
-        return json.loads(args)
-
-    return call
-
-
-def _default_backend(model: str | None) -> tuple[object | None, str]:
-    """Pick a backend from the environment. Groq first (free tier), then Anthropic,
-    then None (offline: cache/fixtures only, no network). Returns (call_fn, model)."""
-    override = os.getenv("RECOVERY_OS_LLM_MODEL")
-    gk = os.getenv("GROQ_API_KEY")
-    if gk:
-        # Groq rotates its catalog; override with RECOVERY_OS_LLM_MODEL if this id
-        # 404s (list via GET /openai/v1/models). gpt-oss-120b has strong tool use.
-        m = model or override or "openai/gpt-oss-120b"
-        return _groq_call_fn(m, gk), m
-    if os.getenv("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_AUTH_TOKEN"):
-        m = model or override or "claude-opus-5"
-        try:
-            return _anthropic_call_fn(m), m
-        except Exception:
-            pass
-    return None, model or override or "claude-opus-5"
-
-
-class _Fault(Exception):
-    def __init__(self, reason: str, excerpt: str = ""):
-        self.reason = reason
-        self.excerpt = excerpt[:200]
-
-
 _UNSET = object()
 
 
@@ -184,27 +208,12 @@ class LLMProposer:
         # call_fn=None explicitly forces offline (cache/fixtures only). Omitting it
         # resolves a backend (Groq or Anthropic) from the environment, else offline.
         if call_fn is _UNSET:
-            self.call_fn, self.model = _default_backend(model)
+            self.call_fn, self.model = resolve_backend(model)
         else:
             self.call_fn, self.model = call_fn, (model or "claude-opus-5")
-        self.cache_dir = Path(
-            cache_dir or os.getenv("RECOVERY_OS_LLM_CACHE_DIR") or "llm_cache")
+        self.cache_dir = Path(cache_dir) if cache_dir else default_cache_dir()
         self.db_path = db_path
         self._memo: dict[str, tuple[Diagnosis, ProposedAction]] = {}
-
-    # --- cache -------------------------------------------------------------
-    def _cache_path(self, key: str) -> Path:
-        return self.cache_dir / f"{key}.json"
-
-    def _cache_get(self, key: str) -> dict | None:
-        p = self._cache_path(key)
-        if p.exists():
-            return json.loads(p.read_text())
-        return None
-
-    def _cache_set(self, key: str, raw: dict) -> None:
-        self.cache_dir.mkdir(parents=True, exist_ok=True)
-        self._cache_path(key).write_text(json.dumps(raw, sort_keys=True, indent=2))
 
     def _validate(self, raw: dict, episode: Episode) -> tuple[Diagnosis, ProposedAction]:
         try:
@@ -240,19 +249,9 @@ class LLMProposer:
             return self._memo[episode.episode_id]
 
         signals = _signals(episode)
-        key = cache_key(self.model, signals)
         try:
-            raw = self._cache_get(key)
-            if raw is None:
-                if self.call_fn is None:
-                    raise _Fault("cache_miss", "no cached response and no backend")
-                try:
-                    raw = self.call_fn(signals)
-                except _Fault:
-                    raise
-                except Exception as e:  # any network/SDK/parse error
-                    raise _Fault("api_error", str(e))
-                self._cache_set(key, raw)
+            raw = cached_tool_call(self.call_fn, self.model, self.cache_dir, signals,
+                                   SYSTEM, _user_prompt(signals), TOOL)
             result = self._validate(raw, episode)
         except _Fault as fault:
             result = self._fault(episode, fault)
