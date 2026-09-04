@@ -1,0 +1,690 @@
+{
+ "seed": 42,
+ "n_episodes": 60,
+ "control_frac": 0.2,
+ "scorecards": [
+  {
+   "policy": "agent",
+   "seed": 42,
+   "control_frac": 0.2,
+   "n_episodes": 60,
+   "n_treatment": 35,
+   "n_control": 11,
+   "n_blocked": 14,
+   "incremental_recovery_rate": 0.5844155844155844,
+   "incremental_recovery_ci_low": 0.29682208216032824,
+   "incremental_recovery_ci_high": 0.8720090866708405,
+   "incremental_amount_paise": 581833,
+   "raw_recovery_rate": 0.55,
+   "false_effort_actions": 6,
+   "false_effort_amount_paise": 264500,
+   "per_cause": [
+    {
+     "cause": "issuer_downtime",
+     "n_treatment": 8,
+     "n_control": 3,
+     "n_blocked": 5,
+     "treatment_recovery_rate": 1.0,
+     "control_recovery_rate": 0.3333333333333333,
+     "incremental_lift": 0.6666666666666667,
+     "lift_ci_low": 0.13322223379388576,
+     "lift_ci_high": 1.2001110995394477,
+     "incremental_amount_paise": 148133
+    },
+    {
+     "cause": "insufficient_funds",
+     "n_treatment": 10,
+     "n_control": 2,
+     "n_blocked": 0,
+     "treatment_recovery_rate": 0.7,
+     "control_recovery_rate": 0.5,
+     "incremental_lift": 0.19999999999999996,
+     "lift_ci_low": -0.5489149484420778,
+     "lift_ci_high": 0.9489149484420777,
+     "incremental_amount_paise": 69200
+    },
+    {
+     "cause": "expired_instrument",
+     "n_treatment": 3,
+     "n_control": 2,
+     "n_blocked": 4,
+     "treatment_recovery_rate": 0.6666666666666666,
+     "control_recovery_rate": 0.0,
+     "incremental_lift": 0.6666666666666666,
+     "lift_ci_low": 0.13322223379388565,
+     "lift_ci_high": 1.2001110995394475,
+     "incremental_amount_paise": 58300
+    },
+    {
+     "cause": "network_error",
+     "n_treatment": 3,
+     "n_control": 1,
+     "n_blocked": 3,
+     "treatment_recovery_rate": 1.0,
+     "control_recovery_rate": 1.0,
+     "incremental_lift": 0.0,
+     "lift_ci_low": 0.0,
+     "lift_ci_high": 0.0,
+     "incremental_amount_paise": 0
+    },
+    {
+     "cause": "abandonment",
+     "n_treatment": 6,
+     "n_control": 1,
+     "n_blocked": 0,
+     "treatment_recovery_rate": 1.0,
+     "control_recovery_rate": 0.0,
+     "incremental_lift": 1.0,
+     "lift_ci_low": 1.0,
+     "lift_ci_high": 1.0,
+     "incremental_amount_paise": 216500
+    },
+    {
+     "cause": "mandate_failure",
+     "n_treatment": 5,
+     "n_control": 2,
+     "n_blocked": 2,
+     "treatment_recovery_rate": 0.8,
+     "control_recovery_rate": 0.0,
+     "incremental_lift": 0.8,
+     "lift_ci_low": 0.44938454112803305,
+     "lift_ci_high": 1.150615458871967,
+     "incremental_amount_paise": 89700
+    }
+   ],
+   "exceptions": [
+    {
+     "episode_id": "ep_pay_42_17",
+     "cause": "expired_instrument",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_18",
+     "cause": "issuer_downtime",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_27",
+     "cause": "expired_instrument",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_29",
+     "cause": "issuer_downtime",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_31",
+     "cause": "issuer_downtime",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_36",
+     "cause": "mandate_failure",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_37",
+     "cause": "issuer_downtime",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_38",
+     "cause": "expired_instrument",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_39",
+     "cause": "network_error",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_42",
+     "cause": "mandate_failure",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_44",
+     "cause": "issuer_downtime",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_46",
+     "cause": "network_error",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_49",
+     "cause": "network_error",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_57",
+     "cause": "expired_instrument",
+     "reason": "gate_blocked: amount_ceiling"
+    }
+   ],
+   "assumptions": {
+    "insufficient_funds": 0.45,
+    "expired_instrument": 0.1,
+    "issuer_downtime": 0.55,
+    "network_error": 0.5,
+    "abandonment": 0.2,
+    "mandate_failure": 0.15
+   },
+   "assumptions_note": "Self-recovery rates are modeling assumptions, not measured facts (conservative priors from published dunning benchmarks: Recurly ~53% soft-decline self-recovery, top-quartile card recovery 60-70%). Tunable in config.SELF_RECOVERY."
+  },
+  {
+   "policy": "immediate",
+   "seed": 42,
+   "control_frac": 0.2,
+   "n_episodes": 60,
+   "n_treatment": 28,
+   "n_control": 11,
+   "n_blocked": 21,
+   "incremental_recovery_rate": 0.4058441558441559,
+   "incremental_recovery_ci_low": 0.09089174270933958,
+   "incremental_recovery_ci_high": 0.7207965689789722,
+   "incremental_amount_paise": 299033,
+   "raw_recovery_rate": 0.36666666666666664,
+   "false_effort_actions": 14,
+   "false_effort_amount_paise": 276800,
+   "per_cause": [
+    {
+     "cause": "issuer_downtime",
+     "n_treatment": 8,
+     "n_control": 3,
+     "n_blocked": 5,
+     "treatment_recovery_rate": 1.0,
+     "control_recovery_rate": 0.3333333333333333,
+     "incremental_lift": 0.6666666666666667,
+     "lift_ci_low": 0.13322223379388576,
+     "lift_ci_high": 1.2001110995394477,
+     "incremental_amount_paise": 148133
+    },
+    {
+     "cause": "insufficient_funds",
+     "n_treatment": 4,
+     "n_control": 2,
+     "n_blocked": 6,
+     "treatment_recovery_rate": 0.5,
+     "control_recovery_rate": 0.5,
+     "incremental_lift": 0.0,
+     "lift_ci_low": -0.8487048957087499,
+     "lift_ci_high": 0.8487048957087499,
+     "incremental_amount_paise": 3900
+    },
+    {
+     "cause": "expired_instrument",
+     "n_treatment": 3,
+     "n_control": 2,
+     "n_blocked": 4,
+     "treatment_recovery_rate": 0.0,
+     "control_recovery_rate": 0.0,
+     "incremental_lift": 0.0,
+     "lift_ci_low": 0.0,
+     "lift_ci_high": 0.0,
+     "incremental_amount_paise": 0
+    },
+    {
+     "cause": "network_error",
+     "n_treatment": 3,
+     "n_control": 1,
+     "n_blocked": 3,
+     "treatment_recovery_rate": 1.0,
+     "control_recovery_rate": 1.0,
+     "incremental_lift": 0.0,
+     "lift_ci_low": 0.0,
+     "lift_ci_high": 0.0,
+     "incremental_amount_paise": 0
+    },
+    {
+     "cause": "abandonment",
+     "n_treatment": 5,
+     "n_control": 1,
+     "n_blocked": 1,
+     "treatment_recovery_rate": 0.4,
+     "control_recovery_rate": 0.0,
+     "incremental_lift": 0.4,
+     "lift_ci_low": -0.0294144850840502,
+     "lift_ci_high": 0.8294144850840502,
+     "incremental_amount_paise": 57300
+    },
+    {
+     "cause": "mandate_failure",
+     "n_treatment": 5,
+     "n_control": 2,
+     "n_blocked": 2,
+     "treatment_recovery_rate": 0.8,
+     "control_recovery_rate": 0.0,
+     "incremental_lift": 0.8,
+     "lift_ci_low": 0.44938454112803305,
+     "lift_ci_high": 1.150615458871967,
+     "incremental_amount_paise": 89700
+    }
+   ],
+   "exceptions": [
+    {
+     "episode_id": "ep_pay_42_0",
+     "cause": "insufficient_funds",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_12",
+     "cause": "insufficient_funds",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_14",
+     "cause": "insufficient_funds",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_17",
+     "cause": "expired_instrument",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_18",
+     "cause": "issuer_downtime",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_25",
+     "cause": "abandonment",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_27",
+     "cause": "expired_instrument",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_29",
+     "cause": "issuer_downtime",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_31",
+     "cause": "issuer_downtime",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_33",
+     "cause": "insufficient_funds",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_36",
+     "cause": "mandate_failure",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_37",
+     "cause": "issuer_downtime",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_38",
+     "cause": "expired_instrument",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_39",
+     "cause": "network_error",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_41",
+     "cause": "insufficient_funds",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_42",
+     "cause": "mandate_failure",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_44",
+     "cause": "issuer_downtime",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_46",
+     "cause": "network_error",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_49",
+     "cause": "network_error",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_57",
+     "cause": "expired_instrument",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_59",
+     "cause": "insufficient_funds",
+     "reason": "gate_blocked: amount_ceiling"
+    }
+   ],
+   "assumptions": {
+    "insufficient_funds": 0.45,
+    "expired_instrument": 0.1,
+    "issuer_downtime": 0.55,
+    "network_error": 0.5,
+    "abandonment": 0.2,
+    "mandate_failure": 0.15
+   },
+   "assumptions_note": "Self-recovery rates are modeling assumptions, not measured facts (conservative priors from published dunning benchmarks: Recurly ~53% soft-decline self-recovery, top-quartile card recovery 60-70%). Tunable in config.SELF_RECOVERY."
+  },
+  {
+   "policy": "fixed_schedule",
+   "seed": 42,
+   "control_frac": 0.2,
+   "n_episodes": 60,
+   "n_treatment": 28,
+   "n_control": 11,
+   "n_blocked": 21,
+   "incremental_recovery_rate": 0.512987012987013,
+   "incremental_recovery_ci_low": 0.2090626432180785,
+   "incremental_recovery_ci_high": 0.8169113827559475,
+   "incremental_amount_paise": 408333,
+   "raw_recovery_rate": 0.4166666666666667,
+   "false_effort_actions": 35,
+   "false_effort_amount_paise": 167500,
+   "per_cause": [
+    {
+     "cause": "issuer_downtime",
+     "n_treatment": 8,
+     "n_control": 3,
+     "n_blocked": 5,
+     "treatment_recovery_rate": 1.0,
+     "control_recovery_rate": 0.3333333333333333,
+     "incremental_lift": 0.6666666666666667,
+     "lift_ci_low": 0.13322223379388576,
+     "lift_ci_high": 1.2001110995394477,
+     "incremental_amount_paise": 148133
+    },
+    {
+     "cause": "insufficient_funds",
+     "n_treatment": 4,
+     "n_control": 2,
+     "n_blocked": 6,
+     "treatment_recovery_rate": 0.75,
+     "control_recovery_rate": 0.5,
+     "incremental_lift": 0.25,
+     "lift_ci_low": -0.562573073637073,
+     "lift_ci_high": 1.0625730736370729,
+     "incremental_amount_paise": 41200
+    },
+    {
+     "cause": "expired_instrument",
+     "n_treatment": 3,
+     "n_control": 2,
+     "n_blocked": 4,
+     "treatment_recovery_rate": 0.3333333333333333,
+     "control_recovery_rate": 0.0,
+     "incremental_lift": 0.3333333333333333,
+     "lift_ci_low": -0.20011109953944767,
+     "lift_ci_high": 0.8667777662061142,
+     "incremental_amount_paise": 44200
+    },
+    {
+     "cause": "network_error",
+     "n_treatment": 3,
+     "n_control": 1,
+     "n_blocked": 3,
+     "treatment_recovery_rate": 1.0,
+     "control_recovery_rate": 1.0,
+     "incremental_lift": 0.0,
+     "lift_ci_low": 0.0,
+     "lift_ci_high": 0.0,
+     "incremental_amount_paise": 0
+    },
+    {
+     "cause": "abandonment",
+     "n_treatment": 5,
+     "n_control": 1,
+     "n_blocked": 1,
+     "treatment_recovery_rate": 0.6,
+     "control_recovery_rate": 0.0,
+     "incremental_lift": 0.6,
+     "lift_ci_low": 0.17058551491594975,
+     "lift_ci_high": 1.0294144850840503,
+     "incremental_amount_paise": 85100
+    },
+    {
+     "cause": "mandate_failure",
+     "n_treatment": 5,
+     "n_control": 2,
+     "n_blocked": 2,
+     "treatment_recovery_rate": 0.8,
+     "control_recovery_rate": 0.0,
+     "incremental_lift": 0.8,
+     "lift_ci_low": 0.44938454112803305,
+     "lift_ci_high": 1.150615458871967,
+     "incremental_amount_paise": 89700
+    }
+   ],
+   "exceptions": [
+    {
+     "episode_id": "ep_pay_42_0",
+     "cause": "insufficient_funds",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_12",
+     "cause": "insufficient_funds",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_14",
+     "cause": "insufficient_funds",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_17",
+     "cause": "expired_instrument",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_18",
+     "cause": "issuer_downtime",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_25",
+     "cause": "abandonment",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_27",
+     "cause": "expired_instrument",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_29",
+     "cause": "issuer_downtime",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_31",
+     "cause": "issuer_downtime",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_33",
+     "cause": "insufficient_funds",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_36",
+     "cause": "mandate_failure",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_37",
+     "cause": "issuer_downtime",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_38",
+     "cause": "expired_instrument",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_39",
+     "cause": "network_error",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_41",
+     "cause": "insufficient_funds",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_42",
+     "cause": "mandate_failure",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_44",
+     "cause": "issuer_downtime",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_46",
+     "cause": "network_error",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_49",
+     "cause": "network_error",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_57",
+     "cause": "expired_instrument",
+     "reason": "gate_blocked: amount_ceiling"
+    },
+    {
+     "episode_id": "ep_pay_42_59",
+     "cause": "insufficient_funds",
+     "reason": "gate_blocked: amount_ceiling"
+    }
+   ],
+   "assumptions": {
+    "insufficient_funds": 0.45,
+    "expired_instrument": 0.1,
+    "issuer_downtime": 0.55,
+    "network_error": 0.5,
+    "abandonment": 0.2,
+    "mandate_failure": 0.15
+   },
+   "assumptions_note": "Self-recovery rates are modeling assumptions, not measured facts (conservative priors from published dunning benchmarks: Recurly ~53% soft-decline self-recovery, top-quartile card recovery 60-70%). Tunable in config.SELF_RECOVERY."
+  },
+  {
+   "policy": "never",
+   "seed": 42,
+   "control_frac": 0.2,
+   "n_episodes": 60,
+   "n_treatment": 49,
+   "n_control": 11,
+   "n_blocked": 0,
+   "incremental_recovery_rate": 0.053803339517625226,
+   "incremental_recovery_ci_low": -0.24032390992719355,
+   "incremental_recovery_ci_high": 0.347930588962444,
+   "incremental_amount_paise": -77600,
+   "raw_recovery_rate": 0.31666666666666665,
+   "false_effort_actions": 0,
+   "false_effort_amount_paise": 0,
+   "per_cause": [
+    {
+     "cause": "issuer_downtime",
+     "n_treatment": 13,
+     "n_control": 3,
+     "n_blocked": 0,
+     "treatment_recovery_rate": 0.6153846153846154,
+     "control_recovery_rate": 0.3333333333333333,
+     "incremental_lift": 0.2820512820512821,
+     "lift_ci_low": -0.3133524566251494,
+     "lift_ci_high": 0.8774550207277136,
+     "incremental_amount_paise": 172900
+    },
+    {
+     "cause": "insufficient_funds",
+     "n_treatment": 10,
+     "n_control": 2,
+     "n_blocked": 0,
+     "treatment_recovery_rate": 0.4,
+     "control_recovery_rate": 0.5,
+     "incremental_lift": -0.09999999999999998,
+     "lift_ci_low": -0.8565701553722562,
+     "lift_ci_high": 0.6565701553722563,
+     "incremental_amount_paise": -67700
+    },
+    {
+     "cause": "expired_instrument",
+     "n_treatment": 7,
+     "n_control": 2,
+     "n_blocked": 0,
+     "treatment_recovery_rate": 0.0,
+     "control_recovery_rate": 0.0,
+     "incremental_lift": 0.0,
+     "lift_ci_low": 0.0,
+     "lift_ci_high": 0.0,
+     "incremental_amount_paise": 0
+    },
+    {
+     "cause": "network_error",
+     "n_treatment": 6,
+     "n_control": 1,
+     "n_blocked": 0,
+     "treatment_recovery_rate": 0.0,
+     "control_recovery_rate": 1.0,
+     "incremental_lift": -1.0,
+     "lift_ci_low": -1.0,
+     "lift_ci_high": -1.0,
+     "incremental_amount_paise": -305400
+    },
+    {
+     "cause": "abandonment",
+     "n_treatment": 6,
+     "n_control": 1,
+     "n_blocked": 0,
+     "treatment_recovery_rate": 0.16666666666666666,
+     "control_recovery_rate": 0.0,
+     "incremental_lift": 0.16666666666666666,
+     "lift_ci_low": -0.1315378368639238,
+     "lift_ci_high": 0.4648711701972571,
+     "incremental_amount_paise": 41500
+    },
+    {
+     "cause": "mandate_failure",
+     "n_treatment": 7,
+     "n_control": 2,
+     "n_blocked": 0,
+     "treatment_recovery_rate": 0.42857142857142855,
+     "control_recovery_rate": 0.0,
+     "incremental_lift": 0.42857142857142855,
+     "lift_ci_low": 0.06196537297496135,
+     "lift_ci_high": 0.7951774841678958,
+     "incremental_amount_paise": 81100
+    }
+   ],
+   "exceptions": [],
+   "assumptions": {
+    "insufficient_funds": 0.45,
+    "expired_instrument": 0.1,
+    "issuer_downtime": 0.55,
+    "network_error": 0.5,
+    "abandonment": 0.2,
+    "mandate_failure": 0.15
+   },
+   "assumptions_note": "Self-recovery rates are modeling assumptions, not measured facts (conservative priors from published dunning benchmarks: Recurly ~53% soft-decline self-recovery, top-quartile card recovery 60-70%). Tunable in config.SELF_RECOVERY."
+  }
+ ]
+}
