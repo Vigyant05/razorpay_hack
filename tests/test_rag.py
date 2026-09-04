@@ -10,6 +10,7 @@ from recovery_os.domain import FailureCause, Intervention, PolicyStatus  # noqa:
 from recovery_os.rag import (  # noqa: E402
     EpisodeView,
     LedgerFilter,
+    LedgerNotFound,
     ask,
     build_views,
     keyword_filter,
@@ -80,6 +81,11 @@ def test_narrator_cites_only_retrieved():
 
 
 # --- grounding: unanswerable -> honest no-match ------------------------------
+
+def test_missing_ledger_raises(tmp_path):
+    with pytest.raises(LedgerNotFound):
+        build_views(str(tmp_path / "nope.db"))
+
 
 def test_ask_no_match_is_honest(ledger_db):
     r = ask("why did the agent act on ep_pay_does_not_exist?", db_path=ledger_db)

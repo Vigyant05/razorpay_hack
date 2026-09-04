@@ -16,11 +16,16 @@ import sys
 from pathlib import Path
 
 from pydantic import BaseModel, ValidationError
+from sqlalchemy.exc import OperationalError
 from sqlmodel import Session, create_engine, select
 
 from .domain import ExecStatus, FailureCause, Intervention, PolicyStatus
 from .ledger import LedgerEntry
 from .llm import _Fault, cached_tool_call, default_cache_dir, resolve_backend
+
+
+class LedgerNotFound(Exception):
+    """The db has no ledger to query (missing file or no rows yet)."""
 
 _CAUSES = [c.value for c in FailureCause]
 _INTERVENTIONS = [i.value for i in Intervention]
@@ -77,9 +82,14 @@ class AnswerResult(BaseModel):
 
 def build_views(db_path: str) -> list[EpisodeView]:
     """Reconstruct one EpisodeView per episode from the append-only rows. Read-only."""
+    if not Path(db_path).exists():
+        raise LedgerNotFound(f"no ledger database at {db_path!r}")
     engine = create_engine(f"sqlite:///{db_path}")
-    with Session(engine) as s:
-        rows = list(s.exec(select(LedgerEntry).order_by(LedgerEntry.id)))
+    try:
+        with Session(engine) as s:
+            rows = list(s.exec(select(LedgerEntry).order_by(LedgerEntry.id)))
+    except OperationalError:  # file exists but no ledger table (never written to)
+        raise LedgerNotFound(f"{db_path!r} has no ledger data")
 
     views: dict[str, EpisodeView] = {}
     for row in rows:

@@ -61,9 +61,15 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.command == "ask":
-        from .rag import ask
+        from .rag import LedgerNotFound, ask
 
-        r = ask(args.question, db_path=args.db)
+        try:
+            r = ask(args.question, db_path=args.db)
+        except LedgerNotFound as e:
+            print(f"{e}. Create a ledger to query first, e.g.:\n"
+                  f"  recovery-os batch --n 50 --seed 42 --db {args.db}"
+                  f"   (add --proposer llm for LLM diagnoses)")
+            return 1
         print(r.answer)
         print(f"\n  matched {r.matched} episode(s)"
               + (f" · cited: {', '.join(r.cited_episode_ids[:8])}" if r.cited_episode_ids else "")
