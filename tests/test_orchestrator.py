@@ -1,5 +1,5 @@
 from recovery_os import ledger
-from recovery_os.domain import Episode, LedgerStep, PolicyStatus
+from recovery_os.domain import LedgerStep, PolicyStatus
 from recovery_os.orchestrator import run_episode
 from recovery_os.policy import PolicyEngine
 from recovery_os.providers import SimulatedProvider

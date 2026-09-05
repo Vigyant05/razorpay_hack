@@ -6,7 +6,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parent))
 import build_rag_fixtures as fx  # noqa: E402
 
-from recovery_os.domain import FailureCause, Intervention, PolicyStatus  # noqa: E402
+from recovery_os.domain import FailureCause, Intervention  # noqa: E402
 from recovery_os.rag import (  # noqa: E402
     EpisodeView,
     LedgerFilter,

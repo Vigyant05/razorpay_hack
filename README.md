@@ -224,6 +224,69 @@ recovery-os batch --n 50  --seed 42 --db batch.db    # build a ledger to query
 recovery-os ask "list every gate-blocked action and the rule that blocked it" --db batch.db
 ```
 
+## Live Razorpay test mode — the provider swap, proven
+
+`SimulatedProvider` and `RazorpayTestProvider` sit behind the one
+`PaymentProvider` Protocol, so swapping backends changes nothing above the seam:
+same diagnosis, same policy gate, same signed mandate, same ledger trail.
+
+```bash
+recovery-os run demo1 --provider razorpay_test --amount 5000 \
+  --trace demo/razorpay_live_trace.json
+```
+
+That makes **real calls against Razorpay test mode** — `POST /orders`,
+`POST /payment_links`, `GET /payment_links/{id}`, `GET /payments/{id}` — and
+writes the full 8-row ledger trail. Two captured runs are committed:
+[razorpay_live_trace_success.json](demo/razorpay_live_trace_success.json) (a full
+successful round trip) and
+[razorpay_live_trace.json](demo/razorpay_live_trace.json) (the latest run). The
+orders and links show up in the Razorpay test dashboard.
+
+> **Test-mode cap:** Razorpay allows **30 payment links per business, for the life
+> of a test account** — cancelling them does not reclaim any, and there is no
+> delete API. So origination uses an **order** (uncapped) and a payment link is
+> minted only *after* the gate approves an intervention that needs one. When the
+> cap is hit, the link call 429s, gets logged as a `fault` row, and the run
+> degrades to `executed=failed` — the pipeline still completes. Raising it needs
+> a request to Razorpay Support, or a fresh test account.
+
+That trace file is also what puts the live run on the audit console — `export.py`
+reads it (never Razorpay directly, so export stays offline and deterministic) and
+adds it as a fourth **live razorpay** episode beside the simulated ones:
+
+```bash
+recovery-os run demo1 --provider razorpay_test --trace demo/razorpay_live_trace.json
+python dashboard/export.py     # picks the trace up; dashboard hot-reloads
+```
+
+**Real:** origination (`POST /orders`), the customer nudge (a payment link with
+its `short_url` in the execution row — re-sent rather than re-minted if the
+episode already has an open one), verification (`GET /orders/{id}` or the link,
+then the payment's real `captured`/`authorized` status), and refunds
+(`POST /payments/{id}/refund`).
+
+**Still simulated:** failure *injection*. Test mode cannot summon issuer downtime
+or an insufficient-funds decline on demand, and the Downtime API returns nothing
+there — so the failure taxonomy and all batch measurement stay on
+`SimulatedProvider`. That split is the design, not a gap. `smart_retry` and
+`mandate_reauth` need a real saved instrument, so against test mode they log a
+`fault` ledger row and return `failed` rather than pretending to have run.
+
+The Groq/LLM proposer is orthogonal to all this. `--provider` chooses who *acts*;
+`--proposer` chooses who *diagnoses*. `--provider razorpay_test` alone makes zero
+LLM calls; add `--proposer llm` and Groq diagnoses a real Razorpay episode while
+the gate, signing and ledger stay exactly the same.
+
+**Production is a provider swap** — a third backend implementing the same three
+methods. The gate, signing, ledger and scorecard never learn which one is active.
+
+Keys come from `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` in the gitignored
+`.env`. The provider refuses to construct without them, and refuses any key that
+isn't `rzp_test_…` — a live key can never be reached from here. Every API error
+is caught, logged as a `fault` row, and turned into a failed result; it never
+crashes a run.
+
 ## Run the dashboard (offline)
 
 ```bash
@@ -243,6 +306,10 @@ python dashboard/export.py      # regenerates dashboard/src/data/*.json
 pytest        # 37 tests, fully offline — no API key, no network
 ```
 
+Three further tests (`tests/test_razorpay_live.py`) hit the real Razorpay test
+API and **skip automatically** when `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` are
+absent. Nothing in the offline suite touches the network or needs a key.
+
 Covers the signing round-trip + tamper detection, append-only ledger, the gate
 blocking an over-ceiling action, batch reproducibility + incremental math, the
 LLM proposer (parse / fallback / gate-block) replayed from committed fixtures,
@@ -252,17 +319,21 @@ and the RAG query/translate/narrate paths.
 
 Copy `.env.example` to `.env`. Modeling knobs (self-recovery rates, amount range,
 dunning attempts) live in `recovery_os/config.py`, labeled as tunable
-assumptions. Keys (`GROQ_API_KEY` / `ANTHROPIC_API_KEY`) are read from `.env` by
-the CLI.
+assumptions. Keys (`GROQ_API_KEY` / `ANTHROPIC_API_KEY`, and
+`RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` for the live backend) are read from
+`.env` by the CLI. The live backend also wants a CA bundle — `pip install -e
+".[razorpay]"` if your Python has none (python.org macOS builds ship without one).
 
 ## Layout
 
 ```
 recovery_os/  config · domain · signing · policy · providers · ledger ·
               orchestrator · batch · scorecard · llm · rag · cli · api
-tests/        signing · ledger · policy · orchestrator · batch · llm · rag (+ fixtures)
+tests/        signing · ledger · policy · orchestrator · batch · llm · rag ·
+              razorpay_live (skipped without keys) (+ fixtures)
+demo/         razorpay_live_trace*.json — real test-mode runs, captured
 dashboard/    read-only React viewer + export.py (src/data/*.json)
 ```
 
-See [CLAUDE.md](CLAUDE.md) for the full invariants, and
-[dashboard/README.md](dashboard/README.md) for the viewer.
+The five invariants are stated in [The one guarantee](#the-one-guarantee) above;
+see [dashboard/README.md](dashboard/README.md) for the viewer.

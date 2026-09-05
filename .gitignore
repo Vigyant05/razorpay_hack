@@ -1,10 +1,19 @@
 __pycache__/
 *.pyc
-.env
-*.db
-*.pem
-.pytest_cache/
 *.egg-info/
+.pytest_cache/
 .venv/
 venv/
+
+# secrets and keys — never commit
+.env
+*.pem
+
+# generated at runtime, rebuildable
+*.db
+*.askcache
 /llm_cache/
+
+# editor / agent workspace config
+.claude/
+CLAUDE.md

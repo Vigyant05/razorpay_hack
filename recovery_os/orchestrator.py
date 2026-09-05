@@ -21,7 +21,6 @@ from .domain import (
     Attribution,
     Diagnosis,
     Episode,
-    ExecStatus,
     FailureCause,
     Intervention,
     LedgerStep,

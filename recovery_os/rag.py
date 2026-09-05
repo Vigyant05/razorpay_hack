@@ -232,7 +232,9 @@ TOOL_ANSWER = {
 SYSTEM_NARRATE = (
     "You answer questions about a payment-recovery audit ledger. Use ONLY the rows "
     "provided — never invent episodes, causes, or outcomes. Cite the episode ids you "
-    "used. If the rows do not contain the answer, say so plainly. Call submit_answer."
+    "used. If the rows do not contain the answer, say so plainly. "
+    "`amount` is INR in paise (minor units): 5000 means Rs 50.00. Never print it as "
+    "dollars or as a raw paise figure. Call submit_answer."
 )
 
 

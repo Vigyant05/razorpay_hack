@@ -12,7 +12,7 @@ import math
 from pydantic import BaseModel
 
 from .config import ASSUMPTIONS_NOTE, SELF_RECOVERY
-from .domain import ExecStatus, FailureCause, Intervention, PolicyStatus, RunReport
+from .domain import FailureCause, Intervention, PolicyStatus, RunReport
 
 _Z = 1.96  # 95% normal-approx CI
 
