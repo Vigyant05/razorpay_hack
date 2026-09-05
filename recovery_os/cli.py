@@ -109,9 +109,22 @@ def main(argv: list[str] | None = None) -> int:
               + (f" ({report.rule_fired})" if report.rule_fired else ""))
         print(f"  executed   : {report.executed.value if report.executed else '— (blocked)'}")
         print(f"  recovered  : {report.recovered}")
+
+        from . import ledger
+        rows = ledger.read(report.episode_id)
+        # last diagnosis row for this episode: shows WHY, which is the whole point
+        # of the LLM proposer — the heuristic's rationale is worth seeing too.
+        diag = [r for r in rows if r.step.value == "diagnosis"]
+        if diag:
+            d = json.loads(diag[-1].payload)
+            print(f"  confidence : {d['confidence']:.0%}")
+            print(f"  because    : {d['rationale']}")
+        fault = [r for r in rows if r.step.value == "fault"]
+        if fault:
+            f = json.loads(fault[-1].payload)
+            print(f"  fault      : {f['reason']} — {f['raw_excerpt'][:100]}")
+
         if args.trace:
-            from . import ledger
-            rows = ledger.read(report.episode_id)
             trace = [{"step": r.step.value, "signature": r.signature,
                       "payload": json.loads(r.payload)} for r in rows]
             with open(args.trace, "w") as f:
