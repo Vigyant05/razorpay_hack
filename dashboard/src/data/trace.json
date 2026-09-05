@@ -21,7 +21,7 @@
       "method": "netbanking",
       "raw_error_code": "PAYMENT_ABANDONED",
       "attempt": 1,
-      "created_at": "2026-09-04T18:30:10.483785Z"
+      "created_at": "2026-09-05T09:33:05.468741Z"
      },
      "signature": null
     },
@@ -42,7 +42,7 @@
       "cause": "abandonment",
       "confidence": 0.9,
       "rationale": "error code 'PAYMENT_ABANDONED' maps to abandonment",
-      "created_at": "2026-09-04T18:30:10.486503Z"
+      "created_at": "2026-09-05T09:33:05.471886Z"
      },
      "signature": null
     },
@@ -53,7 +53,7 @@
       "intervention": "customer_nudge",
       "params": {},
       "rationale": "playbook: abandonment -> customer_nudge",
-      "created_at": "2026-09-04T18:30:10.486509Z"
+      "created_at": "2026-09-05T09:33:05.471891Z"
      },
      "signature": null
     },
@@ -68,7 +68,7 @@
        "intervention": "customer_nudge",
        "params": {},
        "rationale": "playbook: abandonment -> customer_nudge",
-       "created_at": "2026-09-04T18:30:10.486509Z"
+       "created_at": "2026-09-05T09:33:05.471891Z"
       },
       "modified": null
      },
@@ -82,7 +82,7 @@
        "intervention": "customer_nudge",
        "params": {},
        "rationale": "playbook: abandonment -> customer_nudge",
-       "created_at": "2026-09-04T18:30:10.486509Z"
+       "created_at": "2026-09-05T09:33:05.471891Z"
       },
       "decision": {
        "status": "approved",
@@ -93,27 +93,27 @@
         "intervention": "customer_nudge",
         "params": {},
         "rationale": "playbook: abandonment -> customer_nudge",
-        "created_at": "2026-09-04T18:30:10.486509Z"
+        "created_at": "2026-09-05T09:33:05.471891Z"
        },
        "modified": null
       },
-      "payload_sha256": "7456b66da7187e1e8d692f381987a5519d6bc7981d02bb24ebec827220a03799",
-      "signature": "7d2520f5ae7c02370bb9117514cf0c1142043c848b5d6d76ce9d60ff55163df75bef4075146e0091cf3372c93caf8e4f84cd1a89cefd83425ee0ad8a86f61e06",
+      "payload_sha256": "7dc09a7da7237584695a7902d40ca8ddf3d10a67c33ad11acc5e1596877170d3",
+      "signature": "76d8a354029b547aeb7961d475170675daa55867e8eedcfe862c2bd5f7040447c7130e93122f046dc242b12049bf42337605cb5919332d784b010334bf5b9d07",
       "public_key": "522563e5f05d67103c7496ca88475759610b5e75fe47466745e4f05a3fb43719",
-      "signed_at": "2026-09-04T18:30:10.491359Z"
+      "signed_at": "2026-09-05T09:33:05.476237Z"
      },
-     "signature": "7d2520f5ae7c02370bb9117514cf0c1142043c848b5d6d76ce9d60ff55163df75bef4075146e0091cf3372c93caf8e4f84cd1a89cefd83425ee0ad8a86f61e06"
+     "signature": "76d8a354029b547aeb7961d475170675daa55867e8eedcfe862c2bd5f7040447c7130e93122f046dc242b12049bf42337605cb5919332d784b010334bf5b9d07"
     },
     {
      "step": "execution",
      "payload": {
       "episode_id": "ep_pay_42_1",
-      "signature": "7d2520f5ae7c02370bb9117514cf0c1142043c848b5d6d76ce9d60ff55163df75bef4075146e0091cf3372c93caf8e4f84cd1a89cefd83425ee0ad8a86f61e06",
+      "signature": "76d8a354029b547aeb7961d475170675daa55867e8eedcfe862c2bd5f7040447c7130e93122f046dc242b12049bf42337605cb5919332d784b010334bf5b9d07",
       "status": "success",
       "provider": "simulated",
       "detail": "customer_nudge vs abandonment: 1 attempt(s), recovered via intervention",
       "wasted_actions": 0,
-      "executed_at": "2026-09-04T18:30:10.493178Z"
+      "executed_at": "2026-09-05T09:33:05.477919Z"
      },
      "signature": null
     },
@@ -123,394 +123,7 @@
       "episode_id": "ep_pay_42_1",
       "recovered": true,
       "detail": "payment settled",
-      "verified_at": "2026-09-04T18:30:10.494560Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "attribution",
-     "payload": {
-      "episode_id": "ep_pay_42_1",
-      "intervention": "customer_nudge",
-      "recovered": true,
-      "counterfactual": "assume 0% recovery without action",
-      "incremental": true,
-      "note": "naive attribution; incrementality math lands in the scorecard phase"
-     },
-     "signature": null
-    },
-    {
-     "step": "episode",
-     "payload": {
-      "episode_id": "ep_pay_42_1",
-      "payment_id": "pay_42_1",
-      "customer_id": "cust_7151",
-      "amount": 41200,
-      "currency": "INR",
-      "method": "netbanking",
-      "raw_error_code": "PAYMENT_ABANDONED",
-      "attempt": 1,
-      "created_at": "2026-09-04T18:30:56.768495Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "fault",
-     "payload": {
-      "episode_id": "ep_pay_42_1",
-      "reason": "cache_miss",
-      "raw_excerpt": "no cached response and no backend",
-      "fell_back_to": "heuristic"
-     },
-     "signature": null
-    },
-    {
-     "step": "diagnosis",
-     "payload": {
-      "episode_id": "ep_pay_42_1",
-      "cause": "abandonment",
-      "confidence": 0.9,
-      "rationale": "error code 'PAYMENT_ABANDONED' maps to abandonment",
-      "created_at": "2026-09-04T18:30:56.771517Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "proposal",
-     "payload": {
-      "episode_id": "ep_pay_42_1",
-      "intervention": "customer_nudge",
-      "params": {},
-      "rationale": "playbook: abandonment -> customer_nudge",
-      "created_at": "2026-09-04T18:30:56.771522Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "policy",
-     "payload": {
-      "status": "approved",
-      "rule_fired": null,
-      "reason": "no rule fired; within bounds",
-      "original": {
-       "episode_id": "ep_pay_42_1",
-       "intervention": "customer_nudge",
-       "params": {},
-       "rationale": "playbook: abandonment -> customer_nudge",
-       "created_at": "2026-09-04T18:30:56.771522Z"
-      },
-      "modified": null
-     },
-     "signature": null
-    },
-    {
-     "step": "mandate",
-     "payload": {
-      "action": {
-       "episode_id": "ep_pay_42_1",
-       "intervention": "customer_nudge",
-       "params": {},
-       "rationale": "playbook: abandonment -> customer_nudge",
-       "created_at": "2026-09-04T18:30:56.771522Z"
-      },
-      "decision": {
-       "status": "approved",
-       "rule_fired": null,
-       "reason": "no rule fired; within bounds",
-       "original": {
-        "episode_id": "ep_pay_42_1",
-        "intervention": "customer_nudge",
-        "params": {},
-        "rationale": "playbook: abandonment -> customer_nudge",
-        "created_at": "2026-09-04T18:30:56.771522Z"
-       },
-       "modified": null
-      },
-      "payload_sha256": "d2817a0e08ea0a701a01662309bdade5862f23c65e55bb30adfe03052ae5710c",
-      "signature": "d2fad68af79a3cfe7c61b031ae43c595459b5aa3e89df5038f50a720003a9b72108fcf762acd05eb065bd8e6169646a9b6f652cb79b547f9288dca52cbe48104",
-      "public_key": "522563e5f05d67103c7496ca88475759610b5e75fe47466745e4f05a3fb43719",
-      "signed_at": "2026-09-04T18:30:56.776509Z"
-     },
-     "signature": "d2fad68af79a3cfe7c61b031ae43c595459b5aa3e89df5038f50a720003a9b72108fcf762acd05eb065bd8e6169646a9b6f652cb79b547f9288dca52cbe48104"
-    },
-    {
-     "step": "execution",
-     "payload": {
-      "episode_id": "ep_pay_42_1",
-      "signature": "d2fad68af79a3cfe7c61b031ae43c595459b5aa3e89df5038f50a720003a9b72108fcf762acd05eb065bd8e6169646a9b6f652cb79b547f9288dca52cbe48104",
-      "status": "success",
-      "provider": "simulated",
-      "detail": "customer_nudge vs abandonment: 1 attempt(s), recovered via intervention",
-      "wasted_actions": 0,
-      "executed_at": "2026-09-04T18:30:56.778103Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "verification",
-     "payload": {
-      "episode_id": "ep_pay_42_1",
-      "recovered": true,
-      "detail": "payment settled",
-      "verified_at": "2026-09-04T18:30:56.779536Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "attribution",
-     "payload": {
-      "episode_id": "ep_pay_42_1",
-      "intervention": "customer_nudge",
-      "recovered": true,
-      "counterfactual": "assume 0% recovery without action",
-      "incremental": true,
-      "note": "naive attribution; incrementality math lands in the scorecard phase"
-     },
-     "signature": null
-    },
-    {
-     "step": "episode",
-     "payload": {
-      "episode_id": "ep_pay_42_1",
-      "payment_id": "pay_42_1",
-      "customer_id": "cust_7151",
-      "amount": 41200,
-      "currency": "INR",
-      "method": "netbanking",
-      "raw_error_code": "PAYMENT_ABANDONED",
-      "attempt": 1,
-      "created_at": "2026-09-04T18:43:22.796655Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "fault",
-     "payload": {
-      "episode_id": "ep_pay_42_1",
-      "reason": "cache_miss",
-      "raw_excerpt": "no cached response and no backend",
-      "fell_back_to": "heuristic"
-     },
-     "signature": null
-    },
-    {
-     "step": "diagnosis",
-     "payload": {
-      "episode_id": "ep_pay_42_1",
-      "cause": "abandonment",
-      "confidence": 0.9,
-      "rationale": "error code 'PAYMENT_ABANDONED' maps to abandonment",
-      "created_at": "2026-09-04T18:43:22.800506Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "proposal",
-     "payload": {
-      "episode_id": "ep_pay_42_1",
-      "intervention": "customer_nudge",
-      "params": {},
-      "rationale": "playbook: abandonment -> customer_nudge",
-      "created_at": "2026-09-04T18:43:22.800514Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "policy",
-     "payload": {
-      "status": "approved",
-      "rule_fired": null,
-      "reason": "no rule fired; within bounds",
-      "original": {
-       "episode_id": "ep_pay_42_1",
-       "intervention": "customer_nudge",
-       "params": {},
-       "rationale": "playbook: abandonment -> customer_nudge",
-       "created_at": "2026-09-04T18:43:22.800514Z"
-      },
-      "modified": null
-     },
-     "signature": null
-    },
-    {
-     "step": "mandate",
-     "payload": {
-      "action": {
-       "episode_id": "ep_pay_42_1",
-       "intervention": "customer_nudge",
-       "params": {},
-       "rationale": "playbook: abandonment -> customer_nudge",
-       "created_at": "2026-09-04T18:43:22.800514Z"
-      },
-      "decision": {
-       "status": "approved",
-       "rule_fired": null,
-       "reason": "no rule fired; within bounds",
-       "original": {
-        "episode_id": "ep_pay_42_1",
-        "intervention": "customer_nudge",
-        "params": {},
-        "rationale": "playbook: abandonment -> customer_nudge",
-        "created_at": "2026-09-04T18:43:22.800514Z"
-       },
-       "modified": null
-      },
-      "payload_sha256": "c5572fffa72fc2be3a9e4892f9b95a04a4cbd0ede0bf476090b27030c04d7a81",
-      "signature": "4280648533cb6c8b0b664d832d36e142b2a1cb3bbdf158789685aed838bcbd9fc75db222aea24d2f4c7ad4b25a8eb4ecc1e2da6798a355f89b1913890b10ee07",
-      "public_key": "522563e5f05d67103c7496ca88475759610b5e75fe47466745e4f05a3fb43719",
-      "signed_at": "2026-09-04T18:43:22.806627Z"
-     },
-     "signature": "4280648533cb6c8b0b664d832d36e142b2a1cb3bbdf158789685aed838bcbd9fc75db222aea24d2f4c7ad4b25a8eb4ecc1e2da6798a355f89b1913890b10ee07"
-    },
-    {
-     "step": "execution",
-     "payload": {
-      "episode_id": "ep_pay_42_1",
-      "signature": "4280648533cb6c8b0b664d832d36e142b2a1cb3bbdf158789685aed838bcbd9fc75db222aea24d2f4c7ad4b25a8eb4ecc1e2da6798a355f89b1913890b10ee07",
-      "status": "success",
-      "provider": "simulated",
-      "detail": "customer_nudge vs abandonment: 1 attempt(s), recovered via intervention",
-      "wasted_actions": 0,
-      "executed_at": "2026-09-04T18:43:22.808637Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "verification",
-     "payload": {
-      "episode_id": "ep_pay_42_1",
-      "recovered": true,
-      "detail": "payment settled",
-      "verified_at": "2026-09-04T18:43:22.810393Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "attribution",
-     "payload": {
-      "episode_id": "ep_pay_42_1",
-      "intervention": "customer_nudge",
-      "recovered": true,
-      "counterfactual": "assume 0% recovery without action",
-      "incremental": true,
-      "note": "naive attribution; incrementality math lands in the scorecard phase"
-     },
-     "signature": null
-    },
-    {
-     "step": "episode",
-     "payload": {
-      "episode_id": "ep_pay_42_1",
-      "payment_id": "pay_42_1",
-      "customer_id": "cust_7151",
-      "amount": 41200,
-      "currency": "INR",
-      "method": "netbanking",
-      "raw_error_code": "PAYMENT_ABANDONED",
-      "attempt": 1,
-      "created_at": "2026-09-04T18:51:00.897239Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "fault",
-     "payload": {
-      "episode_id": "ep_pay_42_1",
-      "reason": "cache_miss",
-      "raw_excerpt": "no cached response and no backend",
-      "fell_back_to": "heuristic"
-     },
-     "signature": null
-    },
-    {
-     "step": "diagnosis",
-     "payload": {
-      "episode_id": "ep_pay_42_1",
-      "cause": "abandonment",
-      "confidence": 0.9,
-      "rationale": "error code 'PAYMENT_ABANDONED' maps to abandonment",
-      "created_at": "2026-09-04T18:51:00.900568Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "proposal",
-     "payload": {
-      "episode_id": "ep_pay_42_1",
-      "intervention": "customer_nudge",
-      "params": {},
-      "rationale": "playbook: abandonment -> customer_nudge",
-      "created_at": "2026-09-04T18:51:00.900574Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "policy",
-     "payload": {
-      "status": "approved",
-      "rule_fired": null,
-      "reason": "no rule fired; within bounds",
-      "original": {
-       "episode_id": "ep_pay_42_1",
-       "intervention": "customer_nudge",
-       "params": {},
-       "rationale": "playbook: abandonment -> customer_nudge",
-       "created_at": "2026-09-04T18:51:00.900574Z"
-      },
-      "modified": null
-     },
-     "signature": null
-    },
-    {
-     "step": "mandate",
-     "payload": {
-      "action": {
-       "episode_id": "ep_pay_42_1",
-       "intervention": "customer_nudge",
-       "params": {},
-       "rationale": "playbook: abandonment -> customer_nudge",
-       "created_at": "2026-09-04T18:51:00.900574Z"
-      },
-      "decision": {
-       "status": "approved",
-       "rule_fired": null,
-       "reason": "no rule fired; within bounds",
-       "original": {
-        "episode_id": "ep_pay_42_1",
-        "intervention": "customer_nudge",
-        "params": {},
-        "rationale": "playbook: abandonment -> customer_nudge",
-        "created_at": "2026-09-04T18:51:00.900574Z"
-       },
-       "modified": null
-      },
-      "payload_sha256": "71cb4141017858eb8ae7e6950095e71175814230a94fb5a0ce5a75b50df06b7b",
-      "signature": "574461fcc94b537db4a7a2de2c574839a3991ab06a5f56c42eb9bbb079795186af7ae7bd9aea938ecd228426fd340fc24960e0d7845588ddfe98b11f88981b0d",
-      "public_key": "522563e5f05d67103c7496ca88475759610b5e75fe47466745e4f05a3fb43719",
-      "signed_at": "2026-09-04T18:51:00.905255Z"
-     },
-     "signature": "574461fcc94b537db4a7a2de2c574839a3991ab06a5f56c42eb9bbb079795186af7ae7bd9aea938ecd228426fd340fc24960e0d7845588ddfe98b11f88981b0d"
-    },
-    {
-     "step": "execution",
-     "payload": {
-      "episode_id": "ep_pay_42_1",
-      "signature": "574461fcc94b537db4a7a2de2c574839a3991ab06a5f56c42eb9bbb079795186af7ae7bd9aea938ecd228426fd340fc24960e0d7845588ddfe98b11f88981b0d",
-      "status": "success",
-      "provider": "simulated",
-      "detail": "customer_nudge vs abandonment: 1 attempt(s), recovered via intervention",
-      "wasted_actions": 0,
-      "executed_at": "2026-09-04T18:51:00.906848Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "verification",
-     "payload": {
-      "episode_id": "ep_pay_42_1",
-      "recovered": true,
-      "detail": "payment settled",
-      "verified_at": "2026-09-04T18:51:00.908891Z"
+      "verified_at": "2026-09-05T09:33:05.479384Z"
      },
      "signature": null
     },
@@ -549,7 +162,7 @@
       "method": "card",
       "raw_error_code": "BAD_REQUEST_ERROR:card_expired",
       "attempt": 1,
-      "created_at": "2026-09-04T18:30:11.506379Z"
+      "created_at": "2026-09-05T09:33:06.389618Z"
      },
      "signature": null
     },
@@ -560,7 +173,7 @@
       "cause": "expired_instrument",
       "confidence": 0.9,
       "rationale": "error code 'BAD_REQUEST_ERROR:card_expired' maps to expired_instrument",
-      "created_at": "2026-09-04T18:30:11.507911Z"
+      "created_at": "2026-09-05T09:33:06.391096Z"
      },
      "signature": null
     },
@@ -571,7 +184,7 @@
       "intervention": "method_switch",
       "params": {},
       "rationale": "playbook: expired_instrument -> method_switch",
-      "created_at": "2026-09-04T18:30:11.509312Z"
+      "created_at": "2026-09-05T09:33:06.392423Z"
      },
      "signature": null
     },
@@ -586,169 +199,7 @@
        "intervention": "method_switch",
        "params": {},
        "rationale": "playbook: expired_instrument -> method_switch",
-       "created_at": "2026-09-04T18:30:11.509312Z"
-      },
-      "modified": null
-     },
-     "signature": null
-    },
-    {
-     "step": "episode",
-     "payload": {
-      "episode_id": "ep_pay_42_17",
-      "payment_id": "pay_42_17",
-      "customer_id": "cust_9621",
-      "amount": 53400,
-      "currency": "INR",
-      "method": "card",
-      "raw_error_code": "BAD_REQUEST_ERROR:card_expired",
-      "attempt": 1,
-      "created_at": "2026-09-04T18:30:57.864771Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "diagnosis",
-     "payload": {
-      "episode_id": "ep_pay_42_17",
-      "cause": "expired_instrument",
-      "confidence": 0.9,
-      "rationale": "error code 'BAD_REQUEST_ERROR:card_expired' maps to expired_instrument",
-      "created_at": "2026-09-04T18:30:57.866656Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "proposal",
-     "payload": {
-      "episode_id": "ep_pay_42_17",
-      "intervention": "method_switch",
-      "params": {},
-      "rationale": "playbook: expired_instrument -> method_switch",
-      "created_at": "2026-09-04T18:30:57.868377Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "policy",
-     "payload": {
-      "status": "blocked",
-      "rule_fired": "amount_ceiling",
-      "reason": "amount 53400 > ceiling 50000",
-      "original": {
-       "episode_id": "ep_pay_42_17",
-       "intervention": "method_switch",
-       "params": {},
-       "rationale": "playbook: expired_instrument -> method_switch",
-       "created_at": "2026-09-04T18:30:57.868377Z"
-      },
-      "modified": null
-     },
-     "signature": null
-    },
-    {
-     "step": "episode",
-     "payload": {
-      "episode_id": "ep_pay_42_17",
-      "payment_id": "pay_42_17",
-      "customer_id": "cust_9621",
-      "amount": 53400,
-      "currency": "INR",
-      "method": "card",
-      "raw_error_code": "BAD_REQUEST_ERROR:card_expired",
-      "attempt": 1,
-      "created_at": "2026-09-04T18:43:23.767218Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "diagnosis",
-     "payload": {
-      "episode_id": "ep_pay_42_17",
-      "cause": "expired_instrument",
-      "confidence": 0.9,
-      "rationale": "error code 'BAD_REQUEST_ERROR:card_expired' maps to expired_instrument",
-      "created_at": "2026-09-04T18:43:23.768731Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "proposal",
-     "payload": {
-      "episode_id": "ep_pay_42_17",
-      "intervention": "method_switch",
-      "params": {},
-      "rationale": "playbook: expired_instrument -> method_switch",
-      "created_at": "2026-09-04T18:43:23.770224Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "policy",
-     "payload": {
-      "status": "blocked",
-      "rule_fired": "amount_ceiling",
-      "reason": "amount 53400 > ceiling 50000",
-      "original": {
-       "episode_id": "ep_pay_42_17",
-       "intervention": "method_switch",
-       "params": {},
-       "rationale": "playbook: expired_instrument -> method_switch",
-       "created_at": "2026-09-04T18:43:23.770224Z"
-      },
-      "modified": null
-     },
-     "signature": null
-    },
-    {
-     "step": "episode",
-     "payload": {
-      "episode_id": "ep_pay_42_17",
-      "payment_id": "pay_42_17",
-      "customer_id": "cust_9621",
-      "amount": 53400,
-      "currency": "INR",
-      "method": "card",
-      "raw_error_code": "BAD_REQUEST_ERROR:card_expired",
-      "attempt": 1,
-      "created_at": "2026-09-04T18:51:01.891420Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "diagnosis",
-     "payload": {
-      "episode_id": "ep_pay_42_17",
-      "cause": "expired_instrument",
-      "confidence": 0.9,
-      "rationale": "error code 'BAD_REQUEST_ERROR:card_expired' maps to expired_instrument",
-      "created_at": "2026-09-04T18:51:01.893432Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "proposal",
-     "payload": {
-      "episode_id": "ep_pay_42_17",
-      "intervention": "method_switch",
-      "params": {},
-      "rationale": "playbook: expired_instrument -> method_switch",
-      "created_at": "2026-09-04T18:51:01.895164Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "policy",
-     "payload": {
-      "status": "blocked",
-      "rule_fired": "amount_ceiling",
-      "reason": "amount 53400 > ceiling 50000",
-      "original": {
-       "episode_id": "ep_pay_42_17",
-       "intervention": "method_switch",
-       "params": {},
-       "rationale": "playbook: expired_instrument -> method_switch",
-       "created_at": "2026-09-04T18:51:01.895164Z"
+       "created_at": "2026-09-05T09:33:06.392423Z"
       },
       "modified": null
      },
@@ -777,7 +228,7 @@
       "method": "card",
       "raw_error_code": "GATEWAY_TIMEOUT",
       "attempt": 1,
-      "created_at": "2026-09-04T18:30:11.282525Z"
+      "created_at": "2026-09-05T09:33:06.211759Z"
      },
      "signature": null
     },
@@ -788,7 +239,7 @@
       "cause": "network_error",
       "confidence": 0.9,
       "rationale": "error code 'GATEWAY_TIMEOUT' maps to network_error",
-      "created_at": "2026-09-04T18:30:11.284460Z"
+      "created_at": "2026-09-05T09:33:06.213032Z"
      },
      "signature": null
     },
@@ -799,7 +250,7 @@
       "intervention": "smart_retry",
       "params": {},
       "rationale": "playbook: network_error -> smart_retry",
-      "created_at": "2026-09-04T18:30:11.285891Z"
+      "created_at": "2026-09-05T09:33:06.214319Z"
      },
      "signature": null
     },
@@ -814,7 +265,7 @@
        "intervention": "smart_retry",
        "params": {},
        "rationale": "playbook: network_error -> smart_retry",
-       "created_at": "2026-09-04T18:30:11.285891Z"
+       "created_at": "2026-09-05T09:33:06.214319Z"
       },
       "modified": null
      },
@@ -828,7 +279,7 @@
        "intervention": "smart_retry",
        "params": {},
        "rationale": "playbook: network_error -> smart_retry",
-       "created_at": "2026-09-04T18:30:11.285891Z"
+       "created_at": "2026-09-05T09:33:06.214319Z"
       },
       "decision": {
        "status": "approved",
@@ -839,27 +290,27 @@
         "intervention": "smart_retry",
         "params": {},
         "rationale": "playbook: network_error -> smart_retry",
-        "created_at": "2026-09-04T18:30:11.285891Z"
+        "created_at": "2026-09-05T09:33:06.214319Z"
        },
        "modified": null
       },
-      "payload_sha256": "88dea7152eb8c704947fbae5071d570a93b2e68b6c65e7c910cb612f907beb3a",
-      "signature": "935607545e5b758f54c8fa75bc2c52f226259efbdcfd219a16b04d079e8c7500d7d0cbbd71fa66a05fb9c97158c05a65d68aba13e97f5651ffb903762c2d0a03",
+      "payload_sha256": "a3835c83781444b58c11941412ffb772eb6bff652ff04021047f0e7d63859f07",
+      "signature": "8d0b633b0d0b844b78921f90efa535c1be7a4170c99fbfe83ea95978d8e3177059b0a0d74a0288a308517137b152a2c4f21190b4f26731ecbbbaec8529aaee0d",
       "public_key": "522563e5f05d67103c7496ca88475759610b5e75fe47466745e4f05a3fb43719",
-      "signed_at": "2026-09-04T18:30:11.289169Z"
+      "signed_at": "2026-09-05T09:33:06.217165Z"
      },
-     "signature": "935607545e5b758f54c8fa75bc2c52f226259efbdcfd219a16b04d079e8c7500d7d0cbbd71fa66a05fb9c97158c05a65d68aba13e97f5651ffb903762c2d0a03"
+     "signature": "8d0b633b0d0b844b78921f90efa535c1be7a4170c99fbfe83ea95978d8e3177059b0a0d74a0288a308517137b152a2c4f21190b4f26731ecbbbaec8529aaee0d"
     },
     {
      "step": "execution",
      "payload": {
       "episode_id": "ep_pay_42_2",
-      "signature": "935607545e5b758f54c8fa75bc2c52f226259efbdcfd219a16b04d079e8c7500d7d0cbbd71fa66a05fb9c97158c05a65d68aba13e97f5651ffb903762c2d0a03",
+      "signature": "8d0b633b0d0b844b78921f90efa535c1be7a4170c99fbfe83ea95978d8e3177059b0a0d74a0288a308517137b152a2c4f21190b4f26731ecbbbaec8529aaee0d",
       "status": "success",
       "provider": "simulated",
       "detail": "smart_retry vs network_error: 1 attempt(s), recovered via intervention",
       "wasted_actions": 0,
-      "executed_at": "2026-09-04T18:30:11.290826Z"
+      "executed_at": "2026-09-05T09:33:06.218701Z"
      },
      "signature": null
     },
@@ -869,364 +320,7 @@
       "episode_id": "ep_pay_42_2",
       "recovered": true,
       "detail": "payment settled",
-      "verified_at": "2026-09-04T18:30:11.312005Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "attribution",
-     "payload": {
-      "episode_id": "ep_pay_42_2",
-      "intervention": "smart_retry",
-      "recovered": true,
-      "counterfactual": "assume 0% recovery without action",
-      "incremental": true,
-      "note": "naive attribution; incrementality math lands in the scorecard phase"
-     },
-     "signature": null
-    },
-    {
-     "step": "episode",
-     "payload": {
-      "episode_id": "ep_pay_42_2",
-      "payment_id": "pay_42_2",
-      "customer_id": "cust_5951",
-      "amount": 43600,
-      "currency": "INR",
-      "method": "card",
-      "raw_error_code": "GATEWAY_TIMEOUT",
-      "attempt": 1,
-      "created_at": "2026-09-04T18:30:57.615203Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "diagnosis",
-     "payload": {
-      "episode_id": "ep_pay_42_2",
-      "cause": "network_error",
-      "confidence": 0.9,
-      "rationale": "error code 'GATEWAY_TIMEOUT' maps to network_error",
-      "created_at": "2026-09-04T18:30:57.617119Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "proposal",
-     "payload": {
-      "episode_id": "ep_pay_42_2",
-      "intervention": "smart_retry",
-      "params": {},
-      "rationale": "playbook: network_error -> smart_retry",
-      "created_at": "2026-09-04T18:30:57.618739Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "policy",
-     "payload": {
-      "status": "approved",
-      "rule_fired": null,
-      "reason": "no rule fired; within bounds",
-      "original": {
-       "episode_id": "ep_pay_42_2",
-       "intervention": "smart_retry",
-       "params": {},
-       "rationale": "playbook: network_error -> smart_retry",
-       "created_at": "2026-09-04T18:30:57.618739Z"
-      },
-      "modified": null
-     },
-     "signature": null
-    },
-    {
-     "step": "mandate",
-     "payload": {
-      "action": {
-       "episode_id": "ep_pay_42_2",
-       "intervention": "smart_retry",
-       "params": {},
-       "rationale": "playbook: network_error -> smart_retry",
-       "created_at": "2026-09-04T18:30:57.618739Z"
-      },
-      "decision": {
-       "status": "approved",
-       "rule_fired": null,
-       "reason": "no rule fired; within bounds",
-       "original": {
-        "episode_id": "ep_pay_42_2",
-        "intervention": "smart_retry",
-        "params": {},
-        "rationale": "playbook: network_error -> smart_retry",
-        "created_at": "2026-09-04T18:30:57.618739Z"
-       },
-       "modified": null
-      },
-      "payload_sha256": "2c188b4ee811f800e55e49c0baa756cdb0d728c7f709a59043eee6e7c13468be",
-      "signature": "3cf3cf7fe3096e3d29851a647a79171d74722438c1c1a9c4920f0f72672b53bf9e073d5bbebf67daa27b44dcbf78d050975140a53834119ab2708e831a14a704",
-      "public_key": "522563e5f05d67103c7496ca88475759610b5e75fe47466745e4f05a3fb43719",
-      "signed_at": "2026-09-04T18:30:57.622273Z"
-     },
-     "signature": "3cf3cf7fe3096e3d29851a647a79171d74722438c1c1a9c4920f0f72672b53bf9e073d5bbebf67daa27b44dcbf78d050975140a53834119ab2708e831a14a704"
-    },
-    {
-     "step": "execution",
-     "payload": {
-      "episode_id": "ep_pay_42_2",
-      "signature": "3cf3cf7fe3096e3d29851a647a79171d74722438c1c1a9c4920f0f72672b53bf9e073d5bbebf67daa27b44dcbf78d050975140a53834119ab2708e831a14a704",
-      "status": "success",
-      "provider": "simulated",
-      "detail": "smart_retry vs network_error: 1 attempt(s), recovered via intervention",
-      "wasted_actions": 0,
-      "executed_at": "2026-09-04T18:30:57.623932Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "verification",
-     "payload": {
-      "episode_id": "ep_pay_42_2",
-      "recovered": true,
-      "detail": "payment settled",
-      "verified_at": "2026-09-04T18:30:57.645402Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "attribution",
-     "payload": {
-      "episode_id": "ep_pay_42_2",
-      "intervention": "smart_retry",
-      "recovered": true,
-      "counterfactual": "assume 0% recovery without action",
-      "incremental": true,
-      "note": "naive attribution; incrementality math lands in the scorecard phase"
-     },
-     "signature": null
-    },
-    {
-     "step": "episode",
-     "payload": {
-      "episode_id": "ep_pay_42_2",
-      "payment_id": "pay_42_2",
-      "customer_id": "cust_5951",
-      "amount": 43600,
-      "currency": "INR",
-      "method": "card",
-      "raw_error_code": "GATEWAY_TIMEOUT",
-      "attempt": 1,
-      "created_at": "2026-09-04T18:43:23.558580Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "diagnosis",
-     "payload": {
-      "episode_id": "ep_pay_42_2",
-      "cause": "network_error",
-      "confidence": 0.9,
-      "rationale": "error code 'GATEWAY_TIMEOUT' maps to network_error",
-      "created_at": "2026-09-04T18:43:23.560084Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "proposal",
-     "payload": {
-      "episode_id": "ep_pay_42_2",
-      "intervention": "smart_retry",
-      "params": {},
-      "rationale": "playbook: network_error -> smart_retry",
-      "created_at": "2026-09-04T18:43:23.561460Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "policy",
-     "payload": {
-      "status": "approved",
-      "rule_fired": null,
-      "reason": "no rule fired; within bounds",
-      "original": {
-       "episode_id": "ep_pay_42_2",
-       "intervention": "smart_retry",
-       "params": {},
-       "rationale": "playbook: network_error -> smart_retry",
-       "created_at": "2026-09-04T18:43:23.561460Z"
-      },
-      "modified": null
-     },
-     "signature": null
-    },
-    {
-     "step": "mandate",
-     "payload": {
-      "action": {
-       "episode_id": "ep_pay_42_2",
-       "intervention": "smart_retry",
-       "params": {},
-       "rationale": "playbook: network_error -> smart_retry",
-       "created_at": "2026-09-04T18:43:23.561460Z"
-      },
-      "decision": {
-       "status": "approved",
-       "rule_fired": null,
-       "reason": "no rule fired; within bounds",
-       "original": {
-        "episode_id": "ep_pay_42_2",
-        "intervention": "smart_retry",
-        "params": {},
-        "rationale": "playbook: network_error -> smart_retry",
-        "created_at": "2026-09-04T18:43:23.561460Z"
-       },
-       "modified": null
-      },
-      "payload_sha256": "e9c1f26d126699da6b6522a7876730703c0aa5521cb3e28498e9b89665dee31e",
-      "signature": "cdd2a6b3770634869856f5ba931d1ab25f2876664d6b5dc95a8fc99b2793e3b732b95e0d38cd69f33538681bdade863cec260b9b4c2eb0c32c1f1084b71ea20f",
-      "public_key": "522563e5f05d67103c7496ca88475759610b5e75fe47466745e4f05a3fb43719",
-      "signed_at": "2026-09-04T18:43:23.564794Z"
-     },
-     "signature": "cdd2a6b3770634869856f5ba931d1ab25f2876664d6b5dc95a8fc99b2793e3b732b95e0d38cd69f33538681bdade863cec260b9b4c2eb0c32c1f1084b71ea20f"
-    },
-    {
-     "step": "execution",
-     "payload": {
-      "episode_id": "ep_pay_42_2",
-      "signature": "cdd2a6b3770634869856f5ba931d1ab25f2876664d6b5dc95a8fc99b2793e3b732b95e0d38cd69f33538681bdade863cec260b9b4c2eb0c32c1f1084b71ea20f",
-      "status": "success",
-      "provider": "simulated",
-      "detail": "smart_retry vs network_error: 1 attempt(s), recovered via intervention",
-      "wasted_actions": 0,
-      "executed_at": "2026-09-04T18:43:23.566358Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "verification",
-     "payload": {
-      "episode_id": "ep_pay_42_2",
-      "recovered": true,
-      "detail": "payment settled",
-      "verified_at": "2026-09-04T18:43:23.586655Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "attribution",
-     "payload": {
-      "episode_id": "ep_pay_42_2",
-      "intervention": "smart_retry",
-      "recovered": true,
-      "counterfactual": "assume 0% recovery without action",
-      "incremental": true,
-      "note": "naive attribution; incrementality math lands in the scorecard phase"
-     },
-     "signature": null
-    },
-    {
-     "step": "episode",
-     "payload": {
-      "episode_id": "ep_pay_42_2",
-      "payment_id": "pay_42_2",
-      "customer_id": "cust_5951",
-      "amount": 43600,
-      "currency": "INR",
-      "method": "card",
-      "raw_error_code": "GATEWAY_TIMEOUT",
-      "attempt": 1,
-      "created_at": "2026-09-04T18:51:01.684593Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "diagnosis",
-     "payload": {
-      "episode_id": "ep_pay_42_2",
-      "cause": "network_error",
-      "confidence": 0.9,
-      "rationale": "error code 'GATEWAY_TIMEOUT' maps to network_error",
-      "created_at": "2026-09-04T18:51:01.686150Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "proposal",
-     "payload": {
-      "episode_id": "ep_pay_42_2",
-      "intervention": "smart_retry",
-      "params": {},
-      "rationale": "playbook: network_error -> smart_retry",
-      "created_at": "2026-09-04T18:51:01.687498Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "policy",
-     "payload": {
-      "status": "approved",
-      "rule_fired": null,
-      "reason": "no rule fired; within bounds",
-      "original": {
-       "episode_id": "ep_pay_42_2",
-       "intervention": "smart_retry",
-       "params": {},
-       "rationale": "playbook: network_error -> smart_retry",
-       "created_at": "2026-09-04T18:51:01.687498Z"
-      },
-      "modified": null
-     },
-     "signature": null
-    },
-    {
-     "step": "mandate",
-     "payload": {
-      "action": {
-       "episode_id": "ep_pay_42_2",
-       "intervention": "smart_retry",
-       "params": {},
-       "rationale": "playbook: network_error -> smart_retry",
-       "created_at": "2026-09-04T18:51:01.687498Z"
-      },
-      "decision": {
-       "status": "approved",
-       "rule_fired": null,
-       "reason": "no rule fired; within bounds",
-       "original": {
-        "episode_id": "ep_pay_42_2",
-        "intervention": "smart_retry",
-        "params": {},
-        "rationale": "playbook: network_error -> smart_retry",
-        "created_at": "2026-09-04T18:51:01.687498Z"
-       },
-       "modified": null
-      },
-      "payload_sha256": "bfbac00d722e5e2b6fa91608d1a2213fe32e311b2de06780db427d5ac094bc72",
-      "signature": "ee493a2b84ed0ad6862663f13c0b0b4789bd29d0b0ecac9fa40050ef2d67ab85432b7df240f2bc8f84a6dfdbf29468a775b861676e397e99cd3a656a83eac208",
-      "public_key": "522563e5f05d67103c7496ca88475759610b5e75fe47466745e4f05a3fb43719",
-      "signed_at": "2026-09-04T18:51:01.690784Z"
-     },
-     "signature": "ee493a2b84ed0ad6862663f13c0b0b4789bd29d0b0ecac9fa40050ef2d67ab85432b7df240f2bc8f84a6dfdbf29468a775b861676e397e99cd3a656a83eac208"
-    },
-    {
-     "step": "execution",
-     "payload": {
-      "episode_id": "ep_pay_42_2",
-      "signature": "ee493a2b84ed0ad6862663f13c0b0b4789bd29d0b0ecac9fa40050ef2d67ab85432b7df240f2bc8f84a6dfdbf29468a775b861676e397e99cd3a656a83eac208",
-      "status": "success",
-      "provider": "simulated",
-      "detail": "smart_retry vs network_error: 1 attempt(s), recovered via intervention",
-      "wasted_actions": 0,
-      "executed_at": "2026-09-04T18:51:01.692599Z"
-     },
-     "signature": null
-    },
-    {
-     "step": "verification",
-     "payload": {
-      "episode_id": "ep_pay_42_2",
-      "recovered": true,
-      "detail": "payment settled",
-      "verified_at": "2026-09-04T18:51:01.713599Z"
+      "verified_at": "2026-09-05T09:33:06.220362Z"
      },
      "signature": null
     },
@@ -1244,6 +338,138 @@
     }
    ],
    "example": "clean"
+  },
+  {
+   "episode_id": "ep_demo_live",
+   "meta": {
+    "amount": 5000,
+    "method": "payment_link",
+    "error_code": "PAYMENT_ABANDONED",
+    "attempt": 1
+   },
+   "steps": [
+    {
+     "step": "episode",
+     "payload": {
+      "episode_id": "ep_demo_live",
+      "payment_id": "plink_TYFc5cPih76BqP",
+      "customer_id": "cust_demo_live",
+      "amount": 5000,
+      "currency": "INR",
+      "method": "payment_link",
+      "raw_error_code": "PAYMENT_ABANDONED",
+      "attempt": 1,
+      "created_at": "2026-09-05T06:07:41.169051Z"
+     },
+     "signature": null
+    },
+    {
+     "step": "diagnosis",
+     "payload": {
+      "episode_id": "ep_demo_live",
+      "cause": "abandonment",
+      "confidence": 0.9,
+      "rationale": "error code 'PAYMENT_ABANDONED' maps to abandonment",
+      "created_at": "2026-09-05T06:07:41.202954Z"
+     },
+     "signature": null
+    },
+    {
+     "step": "proposal",
+     "payload": {
+      "episode_id": "ep_demo_live",
+      "intervention": "customer_nudge",
+      "params": {},
+      "rationale": "playbook: abandonment -> customer_nudge",
+      "created_at": "2026-09-05T06:07:41.206561Z"
+     },
+     "signature": null
+    },
+    {
+     "step": "policy",
+     "payload": {
+      "status": "approved",
+      "rule_fired": null,
+      "reason": "no rule fired; within bounds",
+      "original": {
+       "episode_id": "ep_demo_live",
+       "intervention": "customer_nudge",
+       "params": {},
+       "rationale": "playbook: abandonment -> customer_nudge",
+       "created_at": "2026-09-05T06:07:41.206561Z"
+      },
+      "modified": null
+     },
+     "signature": null
+    },
+    {
+     "step": "mandate",
+     "payload": {
+      "action": {
+       "episode_id": "ep_demo_live",
+       "intervention": "customer_nudge",
+       "params": {},
+       "rationale": "playbook: abandonment -> customer_nudge",
+       "created_at": "2026-09-05T06:07:41.206561Z"
+      },
+      "decision": {
+       "status": "approved",
+       "rule_fired": null,
+       "reason": "no rule fired; within bounds",
+       "original": {
+        "episode_id": "ep_demo_live",
+        "intervention": "customer_nudge",
+        "params": {},
+        "rationale": "playbook: abandonment -> customer_nudge",
+        "created_at": "2026-09-05T06:07:41.206561Z"
+       },
+       "modified": null
+      },
+      "payload_sha256": "0dfb640de408ec85548a89f2a1cec512b3941632acef23da4c599b5ffe678709",
+      "signature": "b62f31115d535243d066e7c9081c02b877cc6dbc9e52eb6b2e9269809f2e2a4b7ad8110964d5d76dc0c001160b002c23ec6026d99e742c1d561149976527a309",
+      "public_key": "522563e5f05d67103c7496ca88475759610b5e75fe47466745e4f05a3fb43719",
+      "signed_at": "2026-09-05T06:07:41.214846Z"
+     },
+     "signature": "b62f31115d535243d066e7c9081c02b877cc6dbc9e52eb6b2e9269809f2e2a4b7ad8110964d5d76dc0c001160b002c23ec6026d99e742c1d561149976527a309"
+    },
+    {
+     "step": "execution",
+     "payload": {
+      "episode_id": "ep_demo_live",
+      "signature": "b62f31115d535243d066e7c9081c02b877cc6dbc9e52eb6b2e9269809f2e2a4b7ad8110964d5d76dc0c001160b002c23ec6026d99e742c1d561149976527a309",
+      "status": "success",
+      "provider": "razorpay_test",
+      "detail": "customer_nudge sent: plink_TYFc6CCp6l0IAg https://rzp.io/rzp/ToZhcWF",
+      "wasted_actions": 0,
+      "executed_at": "2026-09-05T06:07:41.702726Z"
+     },
+     "signature": null
+    },
+    {
+     "step": "verification",
+     "payload": {
+      "episode_id": "ep_demo_live",
+      "recovered": false,
+      "detail": "payment link plink_TYFc6CCp6l0IAg status=created, amount_paid=0",
+      "verified_at": "2026-09-05T06:07:41.819218Z"
+     },
+     "signature": null
+    },
+    {
+     "step": "attribution",
+     "payload": {
+      "episode_id": "ep_demo_live",
+      "intervention": "customer_nudge",
+      "recovered": false,
+      "counterfactual": "assume 0% recovery without action",
+      "incremental": false,
+      "note": "naive attribution; incrementality math lands in the scorecard phase"
+     },
+     "signature": null
+    }
+   ],
+   "example": "live",
+   "provider": "razorpay_test"
   }
  ]
 }

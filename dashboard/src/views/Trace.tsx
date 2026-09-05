@@ -7,6 +7,7 @@ const EXAMPLE_LABEL: Record<string, string> = {
   fault: "fault handled",
   blocked: "gate blocked",
   clean: "clean run",
+  live: "live razorpay",
 };
 
 function KV({ k, v }: { k: string; v: React.ReactNode }) {
@@ -158,6 +159,9 @@ export function Trace({ data }: { data: TraceFile }) {
         <div className="meta-cell"><span className="eyebrow">Method</span><b>{ep.meta.method}</b></div>
         <div className="meta-cell"><span className="eyebrow">Error code</span><b>{ep.meta.error_code}</b></div>
         <div className="meta-cell"><span className="eyebrow">Cause</span><b>{titleCase(causeOf(ep))}</b></div>
+        {ep.provider && (
+          <div className="meta-cell"><span className="eyebrow">Provider</span><b>{ep.provider}</b></div>
+        )}
       </div>
 
       <div className="panel spine">

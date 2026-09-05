@@ -10,7 +10,6 @@ Deterministic and offline (no API key). Writes to dashboard/src/data/.
 from __future__ import annotations
 
 import json
-import os
 import sqlite3
 import sys
 from collections import defaultdict
@@ -22,6 +21,12 @@ sys.path.insert(0, str(ROOT / "tests"))
 OUT = Path(__file__).resolve().parent / "src" / "data"
 
 SEED, N = 42, 60
+# The captured live Razorpay test-mode run, if one has been recorded. Written by
+#   recovery-os run <id> --provider razorpay_test --trace demo/razorpay_live_trace.json
+# Read as a file so export stays offline and deterministic — it never calls Razorpay.
+# Prefer the fully-successful capture; fall back to the latest run.
+LIVE_TRACES = [ROOT / "demo" / "razorpay_live_trace_success.json",
+               ROOT / "demo" / "razorpay_live_trace.json"]
 
 
 def _rows(db: str):
@@ -83,7 +88,23 @@ def build_trace(llm_db: str, heur_db: str) -> dict:
         e = _episode(steps)
         e["example"] = label
         episodes.append(e)
+
+    live = _live_episode()
+    if live is not None:
+        episodes.append(live)
     return {"seed": SEED, "episodes": episodes}
+
+
+def _live_episode() -> dict | None:
+    """The real Razorpay test-mode run, replayed from its committed trace file."""
+    path = next((p for p in LIVE_TRACES if p.exists()), None)
+    if path is None:
+        return None
+    raw = json.loads(path.read_text())
+    e = _episode(raw["steps"])
+    e["example"] = "live"
+    e["provider"] = raw.get("provider", "razorpay_test")
+    return e
 
 
 QUESTIONS = [
@@ -132,6 +153,10 @@ def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     tmp = OUT / "_build"
     tmp.mkdir(exist_ok=True)
+    # The ledger is append-only, so a reused db would stack this run's rows on top
+    # of the last export's and show every episode's steps N times over. Start clean.
+    for stale in tmp.glob("*.db"):
+        stale.unlink()
     llm_db, heur_db = str(tmp / "llm.db"), str(tmp / "heur.db")
 
     import build_rag_fixtures as fx

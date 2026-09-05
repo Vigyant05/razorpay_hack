@@ -55,7 +55,8 @@ export interface TraceFile {
 
 export interface TraceEpisode {
   episode_id: string;
-  example: "fault" | "blocked" | "clean" | string;
+  example: "fault" | "blocked" | "clean" | "live" | string;
+  provider?: string; // set only on the live Razorpay episode
   meta: { amount: number; method: string; error_code: string; attempt: number };
   steps: TraceStep[];
 }
