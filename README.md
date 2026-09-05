@@ -422,3 +422,5 @@ dashboard/    read-only React viewer + export.py (src/data/*.json)
 
 The five invariants are stated in [The one guarantee](#the-one-guarantee) above;
 see [dashboard/README.md](dashboard/README.md) for the viewer.
+
+VIDEO LINK: https://drive.google.com/drive/folders/1vgmzuevcjg2cpWiMTiv7XhNSLxdPYHSP
