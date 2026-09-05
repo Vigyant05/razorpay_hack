@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 
 from . import __version__
 from .config import get_settings, load_env_file
@@ -18,6 +19,11 @@ def main(argv: list[str] | None = None) -> int:
     p_run.add_argument("payment_id", help="e.g. pay_ABC123")
     p_run.add_argument("--proposer", default="heuristic", choices=["heuristic", "llm"],
                        help="diagnosis/proposal source (default heuristic)")
+    p_run.add_argument("--provider", choices=["simulated", "razorpay_test"],
+                       help="override the configured provider for this run")
+    p_run.add_argument("--amount", type=int, default=5_000,
+                       help="origination amount in paise, razorpay_test only (default 5000 = Rs 50)")
+    p_run.add_argument("--trace", help="write this episode's full ledger trail to JSON")
 
     p_ask = sub.add_parser("ask", help="natural-language Q&A over the audit ledger")
     p_ask.add_argument("question")
@@ -78,6 +84,14 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "run":
         from .orchestrator import run_episode
+        from .providers import RazorpayTestProvider, get_provider
+
+        provider = None
+        if args.provider == "razorpay_test":
+            provider = RazorpayTestProvider(amount=args.amount)  # amount is origination-only
+        elif args.provider:
+            provider = get_provider(args.provider)
+        provider = provider or get_provider()  # build once; we print its name below
 
         diagnoser = proposer = None
         if args.proposer == "llm":
@@ -85,14 +99,26 @@ def main(argv: list[str] | None = None) -> int:
             llm = LLMProposer(db_path=get_settings().db_path)
             diagnoser, proposer = llm.diagnose, llm.propose
 
-        report = run_episode(args.payment_id, diagnoser=diagnoser, proposer=proposer)
+        report = run_episode(args.payment_id, provider=provider,
+                             diagnoser=diagnoser, proposer=proposer)
         print(f"episode      : {report.episode_id}")
+        print(f"  provider   : {provider.name}")
         print(f"  cause      : {report.cause.value}")
         print(f"  action     : {report.intervention.value}")
         print(f"  policy     : {report.policy_status.value}"
               + (f" ({report.rule_fired})" if report.rule_fired else ""))
         print(f"  executed   : {report.executed.value if report.executed else '— (blocked)'}")
         print(f"  recovered  : {report.recovered}")
+        if args.trace:
+            from . import ledger
+            rows = ledger.read(report.episode_id)
+            trace = [{"step": r.step.value, "signature": r.signature,
+                      "payload": json.loads(r.payload)} for r in rows]
+            with open(args.trace, "w") as f:
+                json.dump({"episode_id": report.episode_id,
+                           "provider": provider.name,
+                           "steps": trace}, f, indent=2)
+            print(f"\n  wrote {args.trace} ({len(trace)} ledger rows)")
         return 0
 
     # default: info

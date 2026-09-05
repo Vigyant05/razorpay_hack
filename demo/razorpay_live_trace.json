@@ -1,0 +1,135 @@
+{
+  "episode_id": "ep_showcase1",
+  "provider": "razorpay_test",
+  "steps": [
+    {
+      "step": "episode",
+      "signature": null,
+      "payload": {
+        "episode_id": "ep_showcase1",
+        "payment_id": "order_TYGfLddiJoHMio",
+        "customer_id": "cust_showcase1",
+        "amount": 5000,
+        "currency": "INR",
+        "method": "order",
+        "raw_error_code": "PAYMENT_ABANDONED",
+        "attempt": 1,
+        "created_at": "2026-09-05T07:09:27.901840Z"
+      }
+    },
+    {
+      "step": "diagnosis",
+      "signature": null,
+      "payload": {
+        "episode_id": "ep_showcase1",
+        "cause": "abandonment",
+        "confidence": 0.9,
+        "rationale": "error code 'PAYMENT_ABANDONED' maps to abandonment",
+        "created_at": "2026-09-05T07:09:27.930245Z"
+      }
+    },
+    {
+      "step": "proposal",
+      "signature": null,
+      "payload": {
+        "episode_id": "ep_showcase1",
+        "intervention": "customer_nudge",
+        "params": {},
+        "rationale": "playbook: abandonment -> customer_nudge",
+        "created_at": "2026-09-05T07:09:27.933838Z"
+      }
+    },
+    {
+      "step": "policy",
+      "signature": null,
+      "payload": {
+        "status": "approved",
+        "rule_fired": null,
+        "reason": "no rule fired; within bounds",
+        "original": {
+          "episode_id": "ep_showcase1",
+          "intervention": "customer_nudge",
+          "params": {},
+          "rationale": "playbook: abandonment -> customer_nudge",
+          "created_at": "2026-09-05T07:09:27.933838Z"
+        },
+        "modified": null
+      }
+    },
+    {
+      "step": "mandate",
+      "signature": "7f3eeec20e925f0245e0f1208066e2ac69959cf5b3823224721b0f3509a6864df0753ebe6b1c4d7cfaadebd39b0f859c5483f675633f7f192cb7bbae4d24f604",
+      "payload": {
+        "action": {
+          "episode_id": "ep_showcase1",
+          "intervention": "customer_nudge",
+          "params": {},
+          "rationale": "playbook: abandonment -> customer_nudge",
+          "created_at": "2026-09-05T07:09:27.933838Z"
+        },
+        "decision": {
+          "status": "approved",
+          "rule_fired": null,
+          "reason": "no rule fired; within bounds",
+          "original": {
+            "episode_id": "ep_showcase1",
+            "intervention": "customer_nudge",
+            "params": {},
+            "rationale": "playbook: abandonment -> customer_nudge",
+            "created_at": "2026-09-05T07:09:27.933838Z"
+          },
+          "modified": null
+        },
+        "payload_sha256": "abd0fb142395a30f8d32f9b6252028f9ece03165b99d81d7f31cb7ad9d4d9dd1",
+        "signature": "7f3eeec20e925f0245e0f1208066e2ac69959cf5b3823224721b0f3509a6864df0753ebe6b1c4d7cfaadebd39b0f859c5483f675633f7f192cb7bbae4d24f604",
+        "public_key": "522563e5f05d67103c7496ca88475759610b5e75fe47466745e4f05a3fb43719",
+        "signed_at": "2026-09-05T07:09:27.942028Z"
+      }
+    },
+    {
+      "step": "fault",
+      "signature": null,
+      "payload": {
+        "episode_id": "ep_showcase1",
+        "reason": "api_error",
+        "raw_excerpt": "POST /payment_links -> 429 RATE_LIMIT_EXCEEDED: test mode limit of 30 reached for payment_link",
+        "fell_back_to": "none"
+      }
+    },
+    {
+      "step": "execution",
+      "signature": null,
+      "payload": {
+        "episode_id": "ep_showcase1",
+        "signature": "7f3eeec20e925f0245e0f1208066e2ac69959cf5b3823224721b0f3509a6864df0753ebe6b1c4d7cfaadebd39b0f859c5483f675633f7f192cb7bbae4d24f604",
+        "status": "failed",
+        "provider": "razorpay_test",
+        "detail": "razorpay error: POST /payment_links -> 429 RATE_LIMIT_EXCEEDED: test mode limit of 30 reached for payment_link",
+        "wasted_actions": 1,
+        "executed_at": "2026-09-05T07:09:28.466311Z"
+      }
+    },
+    {
+      "step": "verification",
+      "signature": null,
+      "payload": {
+        "episode_id": "ep_showcase1",
+        "recovered": false,
+        "detail": "order order_TYGfLddiJoHMio status=created, attempts=0, amount_paid=0",
+        "verified_at": "2026-09-05T07:09:28.908132Z"
+      }
+    },
+    {
+      "step": "attribution",
+      "signature": null,
+      "payload": {
+        "episode_id": "ep_showcase1",
+        "intervention": "customer_nudge",
+        "recovered": false,
+        "counterfactual": "assume 0% recovery without action",
+        "incremental": false,
+        "note": "naive attribution; incrementality math lands in the scorecard phase"
+      }
+    }
+  ]
+}

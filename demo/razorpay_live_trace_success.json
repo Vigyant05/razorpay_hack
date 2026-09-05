@@ -1,0 +1,126 @@
+{
+  "episode_id": "ep_demo_live",
+  "provider": "razorpay_test",
+  "note": "A real, fully successful test-mode run, captured 2026-09-05 before this account's lifetime 30-payment-link cap was exhausted. Origination here minted a payment link; the current code originates with an order and mints a link only after the gate approves (see razorpay_live_trace.json).",
+  "steps": [
+    {
+      "step": "episode",
+      "payload": {
+        "episode_id": "ep_demo_live",
+        "payment_id": "plink_TYFc5cPih76BqP",
+        "customer_id": "cust_demo_live",
+        "amount": 5000,
+        "currency": "INR",
+        "method": "payment_link",
+        "raw_error_code": "PAYMENT_ABANDONED",
+        "attempt": 1,
+        "created_at": "2026-09-05T06:07:41.169051Z"
+      },
+      "signature": null
+    },
+    {
+      "step": "diagnosis",
+      "payload": {
+        "episode_id": "ep_demo_live",
+        "cause": "abandonment",
+        "confidence": 0.9,
+        "rationale": "error code 'PAYMENT_ABANDONED' maps to abandonment",
+        "created_at": "2026-09-05T06:07:41.202954Z"
+      },
+      "signature": null
+    },
+    {
+      "step": "proposal",
+      "payload": {
+        "episode_id": "ep_demo_live",
+        "intervention": "customer_nudge",
+        "params": {},
+        "rationale": "playbook: abandonment -> customer_nudge",
+        "created_at": "2026-09-05T06:07:41.206561Z"
+      },
+      "signature": null
+    },
+    {
+      "step": "policy",
+      "payload": {
+        "status": "approved",
+        "rule_fired": null,
+        "reason": "no rule fired; within bounds",
+        "original": {
+          "episode_id": "ep_demo_live",
+          "intervention": "customer_nudge",
+          "params": {},
+          "rationale": "playbook: abandonment -> customer_nudge",
+          "created_at": "2026-09-05T06:07:41.206561Z"
+        },
+        "modified": null
+      },
+      "signature": null
+    },
+    {
+      "step": "mandate",
+      "payload": {
+        "action": {
+          "episode_id": "ep_demo_live",
+          "intervention": "customer_nudge",
+          "params": {},
+          "rationale": "playbook: abandonment -> customer_nudge",
+          "created_at": "2026-09-05T06:07:41.206561Z"
+        },
+        "decision": {
+          "status": "approved",
+          "rule_fired": null,
+          "reason": "no rule fired; within bounds",
+          "original": {
+            "episode_id": "ep_demo_live",
+            "intervention": "customer_nudge",
+            "params": {},
+            "rationale": "playbook: abandonment -> customer_nudge",
+            "created_at": "2026-09-05T06:07:41.206561Z"
+          },
+          "modified": null
+        },
+        "payload_sha256": "0dfb640de408ec85548a89f2a1cec512b3941632acef23da4c599b5ffe678709",
+        "signature": "b62f31115d535243d066e7c9081c02b877cc6dbc9e52eb6b2e9269809f2e2a4b7ad8110964d5d76dc0c001160b002c23ec6026d99e742c1d561149976527a309",
+        "public_key": "522563e5f05d67103c7496ca88475759610b5e75fe47466745e4f05a3fb43719",
+        "signed_at": "2026-09-05T06:07:41.214846Z"
+      },
+      "signature": "b62f31115d535243d066e7c9081c02b877cc6dbc9e52eb6b2e9269809f2e2a4b7ad8110964d5d76dc0c001160b002c23ec6026d99e742c1d561149976527a309"
+    },
+    {
+      "step": "execution",
+      "payload": {
+        "episode_id": "ep_demo_live",
+        "signature": "b62f31115d535243d066e7c9081c02b877cc6dbc9e52eb6b2e9269809f2e2a4b7ad8110964d5d76dc0c001160b002c23ec6026d99e742c1d561149976527a309",
+        "status": "success",
+        "provider": "razorpay_test",
+        "detail": "customer_nudge sent: plink_TYFc6CCp6l0IAg https://rzp.io/rzp/ToZhcWF",
+        "wasted_actions": 0,
+        "executed_at": "2026-09-05T06:07:41.702726Z"
+      },
+      "signature": null
+    },
+    {
+      "step": "verification",
+      "payload": {
+        "episode_id": "ep_demo_live",
+        "recovered": false,
+        "detail": "payment link plink_TYFc6CCp6l0IAg status=created, amount_paid=0",
+        "verified_at": "2026-09-05T06:07:41.819218Z"
+      },
+      "signature": null
+    },
+    {
+      "step": "attribution",
+      "payload": {
+        "episode_id": "ep_demo_live",
+        "intervention": "customer_nudge",
+        "recovered": false,
+        "counterfactual": "assume 0% recovery without action",
+        "incremental": false,
+        "note": "naive attribution; incrementality math lands in the scorecard phase"
+      },
+      "signature": null
+    }
+  ]
+}

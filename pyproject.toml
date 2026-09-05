@@ -13,6 +13,8 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
+# Only for the live Razorpay backend, and only if your Python ships no CA bundle.
+razorpay = ["certifi"]
 
 [project.scripts]
 recovery-os = "recovery_os.cli:main"

@@ -15,6 +15,7 @@ import os
 from pathlib import Path
 
 from . import ledger
+from .config import ssl_context
 from .domain import (
     Diagnosis,
     DiagnosisFault,
@@ -80,7 +81,7 @@ def _groq_call_fn(model: str, api_key: str):
                      "User-Agent": "recovery-os/0.1"})
         for attempt in range(4):  # retry the free-tier rate limit before giving up
             try:
-                with urllib.request.urlopen(req, timeout=30) as r:
+                with urllib.request.urlopen(req, timeout=30, context=ssl_context()) as r:
                     data = json.loads(r.read())
                 break
             except urllib.error.HTTPError as e:

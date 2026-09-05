@@ -90,6 +90,21 @@ def get_settings() -> Settings:
     return Settings()
 
 
+@lru_cache
+def ssl_context():
+    """TLS context for every outbound call (Groq, Anthropic, Razorpay).
+
+    A python.org macOS build ships no CA bundle until you run
+    Install Certificates.command, so trust certifi's when it is importable.
+    """
+    import ssl
+    try:
+        import certifi
+        return ssl.create_default_context(cafile=certifi.where())
+    except ImportError:
+        return ssl.create_default_context()
+
+
 def rng() -> random.Random:
     """The one seeded RNG. Fresh instance per call, seeded identically -> reproducible."""
     return random.Random(get_settings().seed)
