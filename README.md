@@ -30,6 +30,7 @@ or malicious LLM output is just untrusted input to the same gate.
 ## Architecture
 
 ```mermaid
+%%{init: {'theme':'base','themeVariables':{'background':'#ffffff','primaryColor':'#f8fafc','primaryTextColor':'#0f172a','primaryBorderColor':'#94a3b8','secondaryColor':'#f1f5f9','tertiaryColor':'#ffffff','lineColor':'#64748b','fontSize':'14px','clusterBkg':'#fbfdff','clusterBorder':'#cbd5e1','edgeLabelBackground':'#ffffff','nodeTextColor':'#0f172a','titleColor':'#0f172a'}}}%%
 flowchart LR
   CLI["cli.py<br/>run · batch · ask"]
 
@@ -59,6 +60,27 @@ flowchart LR
   LED -. export .-> EXP
   BATCH -. export .-> EXP
   LLM -. "optional narration" .-> EXP
+
+  classDef entry fill:#e0e7ff,stroke:#4338ca,stroke-width:1.5px,color:#1e1b4b
+  classDef gate fill:#fef3c7,stroke:#b45309,stroke-width:2px,color:#451a03
+  classDef sign fill:#dcfce7,stroke:#15803d,stroke-width:1.5px,color:#052e16
+  classDef prov fill:#e0f2fe,stroke:#0369a1,stroke-width:1.5px,color:#082f49
+  classDef llm fill:#f3e8ff,stroke:#7c3aed,stroke-width:1.5px,color:#2e1065
+  classDef store fill:#e2e8f0,stroke:#475569,stroke-width:1.5px,color:#0f172a
+  classDef bad fill:#fee2e2,stroke:#b91c1c,stroke-width:1.5px,color:#450a0a
+  classDef calc fill:#ccfbf1,stroke:#0f766e,stroke-width:1.5px,color:#042f2e
+  classDef view fill:#fce7f3,stroke:#be185d,stroke-width:1.5px,color:#500724
+
+  class CLI entry
+  class ORC,BATCH,RAG calc
+  class POL gate
+  class SIGN sign
+  class PROV prov
+  class LLM llm
+  class LED,JSON store
+  class EXP,UI view
+
+  linkStyle default stroke:#64748b,stroke-width:1.5px
 ```
 
 **Reading it:** the CLI (or the batch runner) drives `orchestrator.run_episode`.
@@ -74,6 +96,7 @@ this.
 ## The recovery loop (workflow)
 
 ```mermaid
+%%{init: {'theme':'base','themeVariables':{'background':'#ffffff','primaryColor':'#f8fafc','primaryTextColor':'#0f172a','primaryBorderColor':'#94a3b8','secondaryColor':'#f1f5f9','tertiaryColor':'#ffffff','lineColor':'#64748b','fontSize':'14px','clusterBkg':'#fbfdff','clusterBorder':'#cbd5e1','edgeLabelBackground':'#ffffff','nodeTextColor':'#0f172a','titleColor':'#0f172a'}}}%%
 flowchart TD
   A["Failed payment"] --> B["detect<br/>provider.fetch_payment"]
   B --> C["diagnose<br/>cause + confidence"]
@@ -97,6 +120,27 @@ flowchart TD
   H --> L
   I --> L
   Z --> L
+
+  classDef entry fill:#e0e7ff,stroke:#4338ca,stroke-width:1.5px,color:#1e1b4b
+  classDef gate fill:#fef3c7,stroke:#b45309,stroke-width:2px,color:#451a03
+  classDef sign fill:#dcfce7,stroke:#15803d,stroke-width:1.5px,color:#052e16
+  classDef prov fill:#e0f2fe,stroke:#0369a1,stroke-width:1.5px,color:#082f49
+  classDef llm fill:#f3e8ff,stroke:#7c3aed,stroke-width:1.5px,color:#2e1065
+  classDef store fill:#e2e8f0,stroke:#475569,stroke-width:1.5px,color:#0f172a
+  classDef bad fill:#fee2e2,stroke:#b91c1c,stroke-width:1.5px,color:#450a0a
+  classDef calc fill:#ccfbf1,stroke:#0f766e,stroke-width:1.5px,color:#042f2e
+  classDef view fill:#fce7f3,stroke:#be185d,stroke-width:1.5px,color:#500724
+
+  class A entry
+  class B,G prov
+  class C,D calc
+  class E gate
+  class F sign
+  class H,I calc
+  class X,Z bad
+  class L store
+
+  linkStyle default stroke:#64748b,stroke-width:1.5px
 ```
 
 Failure is handled, not hidden: a bad LLM response logs a `fault` row and the run
@@ -117,6 +161,7 @@ structured tool-use call per episode, temperature 0, wrapped in a disk
 record-replay cache so runs are deterministic and free after the first pass.
 
 ```mermaid
+%%{init: {'theme':'base','themeVariables':{'background':'#ffffff','fontSize':'14px','actorBkg':'#e0f2fe','actorBorder':'#0369a1','actorTextColor':'#082f49','actorLineColor':'#94a3b8','signalColor':'#475569','signalTextColor':'#0f172a','labelBoxBkgColor':'#fef3c7','labelBoxBorderColor':'#b45309','labelTextColor':'#451a03','loopTextColor':'#0f172a','altBackground':'#f8fafc','noteBkgColor':'#f3e8ff','noteBorderColor':'#7c3aed','noteTextColor':'#2e1065','sequenceNumberColor':'#ffffff'}}}%%
 sequenceDiagram
   participant O as orchestrator
   participant L as LLMProposer
@@ -154,6 +199,7 @@ but explicitly labeled secondary. Self-recovery rates are tunable, cited
 assumptions in `config.py`.
 
 ```mermaid
+%%{init: {'theme':'base','themeVariables':{'background':'#ffffff','primaryColor':'#f8fafc','primaryTextColor':'#0f172a','primaryBorderColor':'#94a3b8','secondaryColor':'#f1f5f9','tertiaryColor':'#ffffff','lineColor':'#64748b','fontSize':'14px','clusterBkg':'#fbfdff','clusterBorder':'#cbd5e1','edgeLabelBackground':'#ffffff','nodeTextColor':'#0f172a','titleColor':'#0f172a'}}}%%
 flowchart LR
   N["N seeded episodes"] --> S{"stratified split<br/>by cause"}
   S -->|treatment| T["real intervention"]
@@ -162,6 +208,25 @@ flowchart LR
   K --> B["baseline recovery %"]
   R --> LIFT["incremental lift = T − B<br/>+ 95% CI · incr ₹"]
   B --> LIFT
+
+  classDef entry fill:#e0e7ff,stroke:#4338ca,stroke-width:1.5px,color:#1e1b4b
+  classDef gate fill:#fef3c7,stroke:#b45309,stroke-width:2px,color:#451a03
+  classDef sign fill:#dcfce7,stroke:#15803d,stroke-width:1.5px,color:#052e16
+  classDef prov fill:#e0f2fe,stroke:#0369a1,stroke-width:1.5px,color:#082f49
+  classDef llm fill:#f3e8ff,stroke:#7c3aed,stroke-width:1.5px,color:#2e1065
+  classDef store fill:#e2e8f0,stroke:#475569,stroke-width:1.5px,color:#0f172a
+  classDef bad fill:#fee2e2,stroke:#b91c1c,stroke-width:1.5px,color:#450a0a
+  classDef calc fill:#ccfbf1,stroke:#0f766e,stroke-width:1.5px,color:#042f2e
+  classDef view fill:#fce7f3,stroke:#be185d,stroke-width:1.5px,color:#500724
+
+  class N entry
+  class S gate
+  class T prov
+  class K store
+  class R,B calc
+  class LIFT sign
+
+  linkStyle default stroke:#64748b,stroke-width:1.5px
 ```
 
 Four policies run the same batch for comparison: `agent` (cause-aware),
@@ -178,6 +243,7 @@ it translates the question to a `LedgerFilter` and narrates the retrieved rows,
 citing episode ids. No row → no claim; invented citations are dropped.
 
 ```mermaid
+%%{init: {'theme':'base','themeVariables':{'background':'#ffffff','primaryColor':'#f8fafc','primaryTextColor':'#0f172a','primaryBorderColor':'#94a3b8','secondaryColor':'#f1f5f9','tertiaryColor':'#ffffff','lineColor':'#64748b','fontSize':'14px','clusterBkg':'#fbfdff','clusterBorder':'#cbd5e1','edgeLabelBackground':'#ffffff','nodeTextColor':'#0f172a','titleColor':'#0f172a'}}}%%
 flowchart LR
   Q["NL question"] --> TR{translate}
   TR -->|LLM| FTR["LedgerFilter"]
@@ -187,6 +253,25 @@ flowchart LR
   ROWS --> NAR{narrate}
   NAR -->|LLM| A1["prose + cited ids<br/>(subset-checked)"]
   NAR -->|fallback| A2["template answer"]
+
+  classDef entry fill:#e0e7ff,stroke:#4338ca,stroke-width:1.5px,color:#1e1b4b
+  classDef gate fill:#fef3c7,stroke:#b45309,stroke-width:2px,color:#451a03
+  classDef sign fill:#dcfce7,stroke:#15803d,stroke-width:1.5px,color:#052e16
+  classDef prov fill:#e0f2fe,stroke:#0369a1,stroke-width:1.5px,color:#082f49
+  classDef llm fill:#f3e8ff,stroke:#7c3aed,stroke-width:1.5px,color:#2e1065
+  classDef store fill:#e2e8f0,stroke:#475569,stroke-width:1.5px,color:#0f172a
+  classDef bad fill:#fee2e2,stroke:#b91c1c,stroke-width:1.5px,color:#450a0a
+  classDef calc fill:#ccfbf1,stroke:#0f766e,stroke-width:1.5px,color:#042f2e
+  classDef view fill:#fce7f3,stroke:#be185d,stroke-width:1.5px,color:#500724
+
+  class Q entry
+  class TR,NAR gate
+  class KW,A2 store
+  class FTR,VW,QRY,ROWS calc
+  class A1 llm
+  class LED store
+
+  linkStyle default stroke:#64748b,stroke-width:1.5px
 ```
 
 It never writes to the ledger and never changes a Phase 0–3 contract.
